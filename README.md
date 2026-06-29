@@ -17,16 +17,16 @@ Apuntec es una plataforma desarrollada para que los estudiantes puedan subir, or
 
 ## Tecnologías
 
-- HTML5
-- CSS3
+- HTML
+- CSS
 - JavaScript
-- Bootstrap
-- PHP
+- Python (Flask)
 - MySQL
 
 ## Equipo
 
 - León Veraldi Rita
+- Lucas Hamlin
 - Vito Martin
 - Matías Hayes
 - Thiago Montenegro
@@ -34,4 +34,3 @@ Apuntec es una plataforma desarrollada para que los estudiantes puedan subir, or
 - Santino Moauro
 - Federico Rojas
 - Juan Pablo Santisi
-- Lucas Hamlin
