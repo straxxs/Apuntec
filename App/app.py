@@ -3,12 +3,14 @@ from modulos.auth import login, registrar_usuario
 from modulos.cursos import (
     crear_curso, editar_curso, listar_cursos, eliminar_curso,
     obtener_curso, listar_alumnos_curso,
+    unir_usuario_a_curso, salir_de_curso,
 )
 from modulos.materias import (
     crear_materia, editar_materia, listar_materias_por_curso,
     eliminar_materia, obtener_materia,
 )
 from modulos.usuarios import listar_usuarios, eliminar_usuario
+
 
 app = Flask(__name__)
 app.secret_key = "mitin_2026"
@@ -24,9 +26,10 @@ def requiere_admin():
 
 
 def es_mi_curso(id_curso):
-    """Admin puede todo. Moderador solo su curso asignado."""
     if session.get("rol") == "admin":
         return True
+    if session.get("rol") != "moderador":
+        return False
     return str(session.get("id_curso")) == str(id_curso)
 
 
@@ -113,7 +116,28 @@ def pagina_curso(id_curso):
         rol=session.get("rol"),
     )
 
+@app.route("/materia/<int:id_materia>")
+def pagina_materia(id_materia):
+    if not requiere_login():
+        return redirect(url_for("login_route"))
 
+    materia = obtener_materia(id_materia)
+    if not materia:
+        return "La materia no existe", 404
+
+    # El usuario debe pertenecer al curso de la materia (o ser admin)
+    if session.get("rol") != "admin" and str(session.get("id_curso")) != str(materia["id_curso"]):
+        return "No tenés acceso a esta materia", 403
+
+    curso = obtener_curso(materia["id_curso"])
+    puede_gestionar = es_mi_curso(materia["id_curso"])
+    return render_template(
+        "materia.html",
+        materia=materia,
+        curso=curso,
+        puede_gestionar=puede_gestionar,
+        rol=session.get("rol"),
+    )
 # ====================== CURSOS (API) ======================
 
 @app.route("/cursos", methods=["GET"])
@@ -121,6 +145,35 @@ def cursos_listar():
     if not requiere_login():
         return jsonify({"ok": False, "mensaje": "No autenticado"}), 401
     return jsonify({"ok": True, "cursos": listar_cursos()})
+
+@app.route("/cursos/unirse", methods=["POST"])
+def cursos_unirse():
+    if not requiere_login():
+        return jsonify({"ok": False, "mensaje": "No autenticado"}), 401
+    if session.get("id_curso"):
+        return jsonify({"ok": False, "mensaje": "Ya pertenecés a un curso. Salí primero."}), 400
+
+    id_curso = request.form.get("id_curso")
+    if not id_curso:
+        return jsonify({"ok": False, "mensaje": "Falta el código del curso"}), 400
+
+    if unir_usuario_a_curso(session["id_usuario"], id_curso):
+        session["id_curso"] = int(id_curso)
+        return jsonify({"ok": True, "mensaje": "¡Te uniste al curso!", "id": int(id_curso)})
+    return jsonify({"ok": False, "mensaje": "No se pudo unir (¿el código es correcto?)"})
+
+@app.route("/cursos/salir", methods=["POST"])
+def cursos_salir():
+    if not requiere_login():
+        return jsonify({"ok": False, "mensaje": "No autenticado"}), 401
+    if not session.get("id_curso"):
+        return jsonify({"ok": False, "mensaje": "No estás en ningún curso"}), 400
+
+    if salir_de_curso(session["id_usuario"]):
+        session["id_curso"] = None
+        session["rol"] = "alumno" if session.get("rol") != "admin" else "admin"
+        return jsonify({"ok": True, "mensaje": "Saliste del curso"})
+    return jsonify({"ok": False, "mensaje": "No se pudo salir del curso"})
 
 
 @app.route("/cursos/<int:id_curso>", methods=["GET"])
@@ -250,7 +303,6 @@ def materias_eliminar(id_materia):
     if eliminar_materia(id_materia):
         return jsonify({"ok": True, "mensaje": "Materia eliminada"})
     return jsonify({"ok": False, "mensaje": "No se pudo eliminar"})
-
 
 # ====================== ADMIN (API) ======================
 

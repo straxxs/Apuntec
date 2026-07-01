@@ -142,3 +142,53 @@ def eliminar_curso(id_curso):
     finally:
         cursor.close()
         conn.close()
+
+def unir_usuario_a_curso(id_usuario, id_curso):
+    """El alumno se une a un curso existente. No cambia su rol (sigue siendo alumno)."""
+    conn = obtener_conexion()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        # Verificar que el curso exista
+        cursor.execute("SELECT id FROM Curso WHERE id = %s", (id_curso,))
+        if not cursor.fetchone():
+            return False
+
+        cursor.execute(
+            "UPDATE Usuario SET id_curso = %s WHERE id = %s",
+            (id_curso, id_usuario),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error al unir usuario a curso: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def salir_de_curso(id_usuario):
+    """El usuario deja su curso actual. Si era moderador, vuelve a alumno."""
+    conn = obtener_conexion()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE Usuario SET id_curso = NULL, rol = 'alumno' WHERE id = %s AND rol != 'admin'",
+            (id_usuario,),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error al salir del curso: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()

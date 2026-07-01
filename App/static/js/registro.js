@@ -1,18 +1,10 @@
 document.getElementById("registroForm").addEventListener("submit", function (e) {
     e.preventDefault();
-
-    const formData = new FormData(this);
-
-    fetch("/registro", {
-        method: "POST",
-        body: formData
-    })
+    fetch("/registro", { method: "POST", body: new FormData(this) })
         .then(res => res.json())
         .then(data => {
-            alert(data.mensaje);
-            if (data.ok) {
-                window.location.href = "/login";
-            }
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
+            if (data.ok) setTimeout(() => window.location.href = "/login", 900);
         })
-        .catch(() => alert("Hubo un error de conexión."));
+        .catch(() => mostrarToast("Hubo un error de conexión.", "error"));
 });

@@ -20,11 +20,17 @@
 <div class="wrapper">
 
     <!-- Datos del curso -->
+        <!-- Datos del curso -->
     <div class="card">
         <h2>Información del curso</h2>
         <p>
             <strong>{{ curso.anio }}° {{ curso.division }}</strong>
             &nbsp;·&nbsp; Creado por: {{ curso.creador or '-' }}
+        </p>
+        <p>
+            Código para invitar compañeros:
+            <strong style="font-size:18px; color:var(--celeste-dark);">{{ curso.id }}</strong>
+            <button class="btn btn-celeste btn-chico" onclick="copiarCodigo({{ curso.id }})">Copiar</button>
         </p>
 
         {% if puede_gestionar %}
@@ -47,7 +53,6 @@
     <!-- Materias -->
     <div class="card">
         <h2>Materias</h2>
-
         {% if puede_gestionar %}
         <form id="formMateria" style="margin-bottom:16px;">
             <div class="form-row">
@@ -84,6 +89,7 @@
 
 </div>
 
+<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 <script src="{{ url_for('static', filename='js/curso.js') }}"></script>
 </body>
 </html>

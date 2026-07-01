@@ -6,13 +6,16 @@
     <title>Inicio - Apuntec</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
 </head>
-<body>
+<body data-id-curso="{{ id_curso or '' }}">
 
 <div class="topbar">
     <h1>📚 Apuntec</h1>
     <div class="nav-links">
         {% if id_curso %}
             <a href="/curso/{{ id_curso }}">Mi curso</a>
+        {% endif %}
+        {% if rol == 'admin' %}
+            <a href="/admin">Admin</a>
         {% endif %}
         <a class="logout" href="/logout">Cerrar sesión</a>
     </div>
@@ -22,15 +25,33 @@
     <div class="card">
         <h2>¡Hola, {{ nombre }}!</h2>
         <p>Tu rol actual: <strong>{{ rol }}</strong></p>
+
         {% if id_curso %}
             <p>Ya formás parte de un curso. Entrá para ver materias y apuntes.</p>
-            <a href="/curso/{{ id_curso }}" class="btn btn-celeste">Ir a mi curso</a>
+            <div class="acciones">
+                <a href="/curso/{{ id_curso }}" class="btn btn-celeste">Ir a mi curso</a>
+                <button id="btnSalir" class="btn btn-rojo">Salir del curso</button>
+            </div>
         {% else %}
-            <p>Todavía no pertenecés a ningún curso. Podés crear uno abajo.</p>
+            <p>Todavía no pertenecés a ningún curso. Unite a uno o creá el tuyo.</p>
         {% endif %}
     </div>
 
     {% if not id_curso %}
+    <div class="card">
+        <h2>Unirme a un curso</h2>
+        <p>Pedile a un compañero el <strong>código del curso</strong> (su número de ID) y pegalo acá.</p>
+        <form id="formUnirse">
+            <div class="form-row">
+                <div class="campo">
+                    <label for="codigoCurso">Código del curso</label>
+                    <input type="number" id="codigoCurso" name="id_curso" placeholder="Ej: 3" required>
+                </div>
+                <button type="submit" class="btn btn-celeste">Unirme</button>
+            </div>
+        </form>
+    </div>
+
     <div class="card">
         <h2>Crear tu propio curso</h2>
         <p>Si creás un curso te convertís en <strong>moderador</strong> y podés agregarle materias.</p>
@@ -51,6 +72,7 @@
     {% endif %}
 </div>
 
+<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
 </html>

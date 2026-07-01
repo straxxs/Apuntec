@@ -3,14 +3,16 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
     fetch("/login", { method: "POST", body: new FormData(this) })
         .then(res => res.json())
         .then(data => {
-            alert(data.mensaje);
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) {
-                if (data.rol === "admin") {
-                    window.location.href = "/admin";
-                } else {
-                    window.location.href = "/home";
-                }
+                setTimeout(() => {
+                    if (data.rol === "admin") {
+                        window.location.href = "/admin";
+                    } else {
+                        window.location.href = "/home";
+                    }
+                }, 700);
             }
         })
-        .catch(() => alert("Hubo un error de conexión."));
+        .catch(() => mostrarToast("Hubo un error de conexión.", "error"));
 });

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ materia.nombre }} - Apuntec</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
+</head>
+<body>
+
+<div class="topbar">
+    <h1>📖 {{ materia.nombre }}</h1>
+    <div class="nav-links">
+        <a href="/home">Inicio</a>
+        <a href="/curso/{{ curso.id }}">Volver al curso</a>
+        <a class="logout" href="/logout">Cerrar sesión</a>
+    </div>
+</div>
+
+<div class="wrapper">
+    <div class="card">
+        <h2>Información de la materia</h2>
+        <p><strong>{{ materia.nombre }}</strong></p>
+        <p>Profesor/a: {{ materia.nombre_profesor or 'Sin asignar' }}</p>
+        <p>Curso: {{ curso.anio }}° {{ curso.division }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Apuntes</h2>
+        <p class="vacio">Todavía no hay apuntes en esta materia. 📄</p>
+        <!-- Acá van a ir los apuntes cuando implementemos esa parte -->
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+</body>
+</html>

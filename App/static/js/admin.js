@@ -32,7 +32,7 @@ function borrarUsuario(id) {
     fetch(`/admin/usuarios/eliminar/${id}`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
-            alert(data.mensaje);
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) cargarUsuarios();
         });
 }
@@ -71,7 +71,7 @@ function borrarCurso(id) {
     fetch(`/cursos/eliminar/${id}`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
-            alert(data.mensaje);
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) cargarCursos();
         });
 }

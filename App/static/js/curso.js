@@ -79,7 +79,7 @@ if (formMateria) {
         fetch("/materias/crear", { method: "POST", body: fd })
             .then(res => res.json())
             .then(data => {
-                alert(data.mensaje);
+                mostrarToast(data.mensaje, data.ok ? "ok" : "error");
                 if (data.ok) { this.reset(); cargarMaterias(); }
             });
     });
@@ -99,7 +99,7 @@ function editarMateria(id, nombreActual, profesorActual) {
     fetch(`/materias/editar/${id}`, { method: "POST", body: fd })
         .then(res => res.json())
         .then(data => {
-            alert(data.mensaje);
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) cargarMaterias();
         });
 }
@@ -111,7 +111,7 @@ function borrarMateria(id) {
     fetch(`/materias/eliminar/${id}`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
-            alert(data.mensaje);
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) cargarMaterias();
         });
 }
@@ -125,10 +125,18 @@ if (formEditarCurso) {
         fetch(`/cursos/editar/${ID_CURSO}`, { method: "POST", body: new FormData(this) })
             .then(res => res.json())
             .then(data => {
-                alert(data.mensaje);
-                if (data.ok) location.reload();
+                mostrarToast(data.mensaje, data.ok ? "ok" : "error");
+                if (data.ok) setTimeout(() => location.reload(), 800);
             });
     });
+}
+
+
+// ---------- Copiar código de invitación ----------
+function copiarCodigo(codigo) {
+    navigator.clipboard.writeText(codigo)
+        .then(() => mostrarToast("Código copiado: " + codigo, "ok"))
+        .catch(() => mostrarToast("Código del curso: " + codigo, "ok"));
 }
 
 
