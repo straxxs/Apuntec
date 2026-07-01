@@ -4,7 +4,7 @@ USE apuntes_db
 CREATE TABLE Curso(
     id INT AUTO_INCREMENT PRIMARY KEY,
     anio INT NOT NULL,
-    division VARCHAR(10) NOT NULL,
+    division VARCHAR(25) NOT NULL,
     id_creador INT,
     FOREIGN KEY (id_creador) REFERENCES Usuario(id)
 );
