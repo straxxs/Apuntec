@@ -1,3 +1,4 @@
+import os
 import pymysql
 from db.conexion import obtener_conexion
 
@@ -54,8 +55,7 @@ def _traer_archivos(cursor, apuntes):
     return apuntes
 
 
-def listar_apuntes_por_materia(id_materia, solo_aprobados=True):
-    """Lista apuntes de una materia. Si solo_aprobados, filtra los 'aprobado'."""
+def listar_apuntes_por_materia(id_materia, id_usuario=None, solo_aprobados=True):
     conn = obtener_conexion()
     if not conn:
         return []
@@ -63,23 +63,48 @@ def listar_apuntes_por_materia(id_materia, solo_aprobados=True):
     try:
         sql = """
             SELECT a.id, a.titulo, a.descripcion, a.estado, a.fecha_subida,
-                   a.id_usuario_creador, u.nombre AS autor, u.avatar AS autor_avatar
+                a.id_usuario_creador, u.nombre AS autor, u.avatar AS autor_avatar,
+                IFNULL(AVG(cal.calificacion), 0) AS promedio,
+                COUNT(DISTINCT cal.id) AS cant_calificaciones
             FROM Apunte a
             LEFT JOIN Usuario u ON a.id_usuario_creador = u.id
+            LEFT JOIN Calificacion cal ON cal.id_apunte = a.id
             WHERE a.id_materia = %s
         """
         if solo_aprobados:
             sql += " AND a.estado = 'aprobado'"
-        sql += " ORDER BY a.fecha_subida DESC"
+        sql += " GROUP BY a.id ORDER BY a.fecha_subida DESC"
         cursor.execute(sql, (id_materia,))
-        return _traer_archivos(cursor, cursor.fetchall())
+        apuntes = cursor.fetchall()
+
+        for ap in apuntes:
+            ap["promedio"] = round(float(ap["promedio"]), 1)
+            # Archivos
+            cursor.execute("SELECT id, ruta, tipo FROM Archivo_Apunte WHERE id_apunte = %s", (ap["id"],))
+            ap["archivos"] = cursor.fetchall()
+            # Datos del usuario actual (si se pasa)
+            if id_usuario:
+                cursor.execute(
+                    "SELECT 1 FROM Guardado WHERE id_alumno = %s AND id_apunte = %s",
+                    (id_usuario, ap["id"]),
+                )
+                ap["guardado"] = cursor.fetchone() is not None
+                cursor.execute(
+                    "SELECT calificacion FROM Calificacion WHERE id_alumno = %s AND id_apunte = %s",
+                    (id_usuario, ap["id"]),
+                )
+                fila = cursor.fetchone()
+                ap["mi_calificacion"] = fila["calificacion"] if fila else 0
+            else:
+                ap["guardado"] = False
+                ap["mi_calificacion"] = 0
+        return apuntes
     except Exception as e:
         print(f"Error al listar apuntes: {e}")
         return []
     finally:
         cursor.close()
         conn.close()
-
 
 def listar_apuntes_pendientes(id_curso):
     """Apuntes pendientes de un curso (para el moderador)."""
@@ -147,15 +172,28 @@ def obtener_apunte(id_apunte):
         conn.close()
 
 
-def eliminar_apunte(id_apunte):
+def eliminar_apunte(id_apunte, carpeta_apuntes):
     conn = obtener_conexion()
     if not conn:
         return False
-    cursor = conn.cursor()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
     try:
+        # Rutas para borrar del disco
+        cursor.execute("SELECT ruta FROM Archivo_Apunte WHERE id_apunte = %s", (id_apunte,))
+        rutas = [fila["ruta"] for fila in cursor.fetchall()]
+
         cursor.execute("DELETE FROM Archivo_Apunte WHERE id_apunte = %s", (id_apunte,))
         cursor.execute("DELETE FROM Apunte WHERE id = %s", (id_apunte,))
         conn.commit()
+
+        for ruta in rutas:
+            ruta_completa = os.path.join(carpeta_apuntes, os.path.basename(ruta))
+            if os.path.exists(ruta_completa):
+                try:
+                    os.remove(ruta_completa)
+                except OSError as e:
+                    print(f"No se pudo borrar {ruta_completa}: {e}")
+
         return cursor.rowcount > 0
     except Exception as e:
         print(f"Error al eliminar apunte: {e}")

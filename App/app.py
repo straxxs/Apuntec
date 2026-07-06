@@ -20,6 +20,9 @@ from modulos.apuntes import (
     listar_apuntes_pendientes, cambiar_estado_apunte,
     obtener_apunte, eliminar_apunte,
 )
+from modulos.valoraciones import (
+    calificar_apunte, alternar_guardado, listar_guardados,
+)
 
 
 app = Flask(__name__)
@@ -417,7 +420,8 @@ def apuntes_por_materia(id_materia):
 
     # Los que gestionan (moderador/admin) ven todos; el alumno solo aprobados
     gestiona = es_mi_curso(materia["id_curso"])
-    apuntes = listar_apuntes_por_materia(id_materia, solo_aprobados=not gestiona)
+    apuntes = listar_apuntes_por_materia(id_materia, id_usuario=session["id_usuario"], solo_aprobados=not gestiona
+    )
     return jsonify({
         "ok": True,
         "apuntes": apuntes,
@@ -440,24 +444,30 @@ def apuntes_crear():
 
     titulo = request.form.get("titulo", "").strip()
     descripcion = request.form.get("descripcion", "")
-    archivo = request.files.get("archivo")
+    archivos = request.files.getlist("archivo")  # <-- múltiples
 
     if not titulo:
         return jsonify({"ok": False, "mensaje": "El título es obligatorio"}), 400
-    if not archivo or not archivo.filename:
-        return jsonify({"ok": False, "mensaje": "Tenés que subir un archivo"}), 400
-    if not extension_ok(archivo.filename, EXT_APUNTES):
-        return jsonify({"ok": False, "mensaje": "Tipo de archivo no permitido"}), 400
+
+    # Filtramos archivos vacíos (cuando no se sube nada, viene un FileStorage sin filename)
+    archivos = [a for a in archivos if a and a.filename]
+
+    # Validar extensiones ANTES de crear el apunte (si hay archivos)
+    for archivo in archivos:
+        if not extension_ok(archivo.filename, EXT_APUNTES):
+            return jsonify({"ok": False, "mensaje": f"Tipo de archivo no permitido: {archivo.filename}"}), 400
 
     id_apunte = crear_apunte(titulo, descripcion, session["id_usuario"],
                             materia["id_curso"], id_materia)
     if not id_apunte:
         return jsonify({"ok": False, "mensaje": "Error al crear el apunte"}), 500
 
-    nombre_seguro = secure_filename(f"apunte{id_apunte}_{archivo.filename}")
-    archivo.save(os.path.join(UPLOAD_APUNTES, nombre_seguro))
-    tipo = archivo.filename.rsplit(".", 1)[1].lower()
-    agregar_archivo_apunte(id_apunte, f"uploads/apuntes/{nombre_seguro}", tipo)
+    # Guardar cada archivo (si los hay)
+    for archivo in archivos:
+        nombre_seguro = secure_filename(f"apunte{id_apunte}_{archivo.filename}")
+        archivo.save(os.path.join(UPLOAD_APUNTES, nombre_seguro))
+        tipo = archivo.filename.rsplit(".", 1)[1].lower()
+        agregar_archivo_apunte(id_apunte, f"uploads/apuntes/{nombre_seguro}", tipo)
 
     return jsonify({"ok": True, "mensaje": "¡Apunte subido! Queda pendiente de aprobación.", "id": id_apunte})
 
@@ -476,6 +486,53 @@ def apuntes_eliminar(id_apunte):
     if eliminar_apunte(id_apunte, UPLOAD_APUNTES):
         return jsonify({"ok": True, "mensaje": "Apunte eliminado"})
     return jsonify({"ok": False, "mensaje": "No se pudo eliminar"})
+
+# ====================== VALORACIONES (RF-07) ======================
+
+@app.route("/apuntes/<int:id_apunte>/calificar", methods=["POST"])
+def apunte_calificar(id_apunte):
+    if not requiere_login():
+        return jsonify({"ok": False, "mensaje": "No autenticado"}), 401
+    apunte = obtener_apunte(id_apunte)
+    if not apunte:
+        return jsonify({"ok": False, "mensaje": "El apunte no existe"}), 404
+    if not puede_ver_materia(apunte["id_curso"]):
+        return jsonify({"ok": False, "mensaje": "Sin acceso"}), 403
+
+    try:
+        estrellas = int(request.form.get("estrellas"))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "mensaje": "Calificación inválida"}), 400
+
+    if calificar_apunte(session["id_usuario"], id_apunte, estrellas):
+        return jsonify({"ok": True, "mensaje": "¡Gracias por tu valoración!"})
+    return jsonify({"ok": False, "mensaje": "No se pudo calificar"})
+
+
+@app.route("/apuntes/<int:id_apunte>/guardar", methods=["POST"])
+def apunte_guardar(id_apunte):
+    if not requiere_login():
+        return jsonify({"ok": False, "mensaje": "No autenticado"}), 401
+    apunte = obtener_apunte(id_apunte)
+    if not apunte:
+        return jsonify({"ok": False, "mensaje": "El apunte no existe"}), 404
+    if not puede_ver_materia(apunte["id_curso"]):
+        return jsonify({"ok": False, "mensaje": "Sin acceso"}), 403
+
+    resultado = alternar_guardado(session["id_usuario"], id_apunte)
+    if resultado == "guardado":
+        return jsonify({"ok": True, "mensaje": "Apunte guardado", "estado": "guardado"})
+    elif resultado == "quitado":
+        return jsonify({"ok": True, "mensaje": "Apunte quitado de guardados", "estado": "quitado"})
+    return jsonify({"ok": False, "mensaje": "No se pudo procesar"})
+
+
+@app.route("/guardados")
+def pagina_guardados():
+    if not requiere_login():
+        return redirect(url_for("login_route"))
+    apuntes = listar_guardados(session["id_usuario"])
+    return render_template("guardados.html", apuntes=apuntes)
 
 # ====================== MODERACIÓN DE APUNTES (RF-08) ======================
 

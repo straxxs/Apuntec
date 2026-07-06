@@ -140,10 +140,17 @@ function cargarApuntes() {
 
                 const previews = (a.archivos || []).map(htmlPreview).join("");
 
+                const estrellas = generarEstrellas(a.id, a.mi_calificacion);
+                const btnGuardar = `
+                    <button class="btn btn-chico ${a.guardado ? 'btn-amarillo' : 'btn-celeste'}"
+                            onclick="toggleGuardar(${a.id}, this)">
+                        ${a.guardado ? '🔖 Guardado' : '🔖 Guardar'}
+                    </button>`;
+
                 const div = document.createElement("div");
                 div.className = "card";
                 div.style.marginBottom = "14px";
-                                div.innerHTML = `
+                div.innerHTML = `
                     <div class="autor-linea">
                         ${htmlAvatar(a.autor, a.autor_avatar, "avatar-chico")}
                         <strong>${a.autor || "Anónimo"}</strong>
@@ -153,7 +160,14 @@ function cargarApuntes() {
                     <h3 style="margin:6px 0;color:var(--tinta);">${a.titulo || "(sin título)"}</h3>
                     <p>${a.descripcion || "<em>Sin descripción</em>"}</p>
                     <div class="preview-grid">${previews}</div>
+                    <div style="margin-top:10px;">
+                        ${estrellas}
+                        <span style="color:var(--tinta-soft);font-size:13px;">
+                            ${a.promedio} / 5 (${a.cant_calificaciones})
+                        </span>
+                    </div>
                     <div class="acciones" style="margin-top:10px;">
+                        ${btnGuardar}
                         ${puedeBorrar
                             ? `<button class="btn btn-rojo btn-chico"
                                 onclick="borrarApunte(${a.id})">Eliminar</button>`
@@ -216,54 +230,36 @@ function abrirLightbox(url) {
     lb.classList.add("abierto");
 }
 
-// ---------- Apuntes pendientes (moderación) ----------
-function cargarPendientes() {
-    if (!PUEDE_GESTIONAR) return;
-    fetch(`/cursos/${ID_CURSO}/pendientes`)
+// ---------- Estrellas ----------
+function generarEstrellas(idApunte, miCalificacion) {
+    let html = `<span class="estrellas" data-apunte="${idApunte}">`;
+    for (let i = 1; i <= 5; i++) {
+        const activa = i <= miCalificacion ? "activa" : "";
+        html += `<span class="estrella ${activa}" onclick="calificar(${idApunte}, ${i})">★</span>`;
+    }
+    html += `</span> `;
+    return html;
+}
+
+function calificar(idApunte, estrellas) {
+    const fd = new FormData();
+    fd.append("estrellas", estrellas);
+    fetch(`/apuntes/${idApunte}/calificar`, { method: "POST", body: fd })
         .then(res => res.json())
         .then(data => {
-            const cont = document.getElementById("listaPendientes");
-            if (!cont) return;
-            cont.innerHTML = "";
-
-            if (!data.apuntes || data.apuntes.length === 0) {
-                cont.innerHTML = '<p class="vacio">No hay apuntes pendientes. 🎉</p>';
-                return;
-            }
-
-            data.apuntes.forEach(a => {
-                const archivos = (a.archivos || []).map(f =>
-                    `<a class="btn btn-celeste btn-chico" href="/static/${f.ruta}" target="_blank">Ver ${f.tipo}</a>`
-                ).join(" ");
-                const div = document.createElement("div");
-                div.className = "card";
-                div.style.marginBottom = "12px";
-                div.innerHTML = `
-                    <strong>${a.titulo}</strong> — <em>${a.materia || ""}</em><br>
-                    <span>Por ${a.autor}</span>
-                    <p>${a.descripcion || ""}</p>
-                    <div class="acciones">
-                        ${archivos}
-                        <button class="btn btn-amarillo btn-chico" onclick="aprobar(${a.id})">✅ Aprobar</button>
-                        <button class="btn btn-rojo btn-chico" onclick="rechazar(${a.id})">❌ Rechazar</button>
-                    </div>`;
-                cont.appendChild(div);
-            });
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
+            if (data.ok) cargarApuntes();
         });
 }
 
-function aprobar(id) {
-    fetch(`/apuntes/${id}/aprobar`, { method: "POST" })
+// ---------- Guardar ----------
+function toggleGuardar(idApunte, btn) {
+    fetch(`/apuntes/${idApunte}/guardar`, { method: "POST" })
         .then(res => res.json())
-        .then(data => { mostrarToast(data.mensaje, data.ok ? "ok" : "error"); if (data.ok) cargarPendientes(); });
+        .then(data => {
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
+            if (data.ok) cargarApuntes();
+        });
 }
-
-function rechazar(id) {
-    fetch(`/apuntes/${id}/rechazar`, { method: "POST" })
-        .then(res => res.json())
-        .then(data => { mostrarToast(data.mensaje, data.ok ? "ok" : "error"); if (data.ok) cargarPendientes(); });
-}
-
-cargarPendientes();
 
 cargarApuntes();

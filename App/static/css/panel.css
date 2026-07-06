@@ -617,3 +617,9 @@ th {
  color: rgb(230, 230, 20);
 }
 
+/* ---------- Estrellas ---------- */
+.estrellas { display: inline-flex; gap: 2px; font-size: 22px; cursor: pointer; }
+.estrella { color: #D8DEE8; transition: color 0.12s, transform 0.12s; }
+.estrella:hover, .estrella.activa { color: var(--amarillo-dark); }
+.estrella:hover { transform: scale(1.15); }
+

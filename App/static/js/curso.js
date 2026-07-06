@@ -165,6 +165,54 @@ function hacerModerador(idUsuario) {
             if (data.ok) cargarAlumnos();
         });
 }
+// ---------- Apuntes pendientes (moderación) ----------
+function cargarPendientes() {
+    if (!PUEDE_GESTIONAR) return;
+    fetch(`/cursos/${ID_CURSO}/pendientes`)
+        .then(res => res.json())
+        .then(data => {
+            const cont = document.getElementById("listaPendientes");
+            if (!cont) return;
+            cont.innerHTML = "";
+
+            if (!data.apuntes || data.apuntes.length === 0) {
+                cont.innerHTML = '<p class="vacio">No hay apuntes pendientes. 🎉</p>';
+                return;
+            }
+
+            data.apuntes.forEach(a => {
+                const archivos = (a.archivos || []).map(f =>
+                    `<a class="btn btn-celeste btn-chico" href="/static/${f.ruta}" target="_blank">Ver ${f.tipo}</a>`
+                ).join(" ");
+                const div = document.createElement("div");
+                div.className = "card";
+                div.style.marginBottom = "12px";
+                div.innerHTML = `
+                    <strong>${a.titulo}</strong> — <em>${a.materia || ""}</em><br>
+                    <span>Por ${a.autor}</span>
+                    <p>${a.descripcion || ""}</p>
+                    <div class="acciones">
+                        ${archivos}
+                        <button class="btn btn-amarillo btn-chico" onclick="aprobar(${a.id})">✅ Aprobar</button>
+                        <button class="btn btn-rojo btn-chico" onclick="rechazar(${a.id})">❌ Rechazar</button>
+                    </div>`;
+                cont.appendChild(div);
+            });
+        });
+}
+
+function aprobar(id) {
+    fetch(`/apuntes/${id}/aprobar`, { method: "POST" })
+        .then(res => res.json())
+        .then(data => { mostrarToast(data.mensaje, data.ok ? "ok" : "error"); if (data.ok) cargarPendientes(); });
+}
+
+function rechazar(id) {
+    fetch(`/apuntes/${id}/rechazar`, { method: "POST" })
+        .then(res => res.json())
+        .then(data => { mostrarToast(data.mensaje, data.ok ? "ok" : "error"); if (data.ok) cargarPendientes(); });
+}
 
 cargarMaterias();
 cargarAlumnos();
+cargarPendientes();
