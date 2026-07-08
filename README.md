@@ -1,4 +1,4 @@
-# Apuntec
+# Kiroku
 
 > Plataforma web colaborativa para compartir y consultar apuntes escolares.
 
