@@ -149,6 +149,23 @@ def eliminar_curso(id_curso, carpeta_apuntes):
             WHERE a.id_curso = %s
         """, (id_curso,))
 
+        # 2b. Borrar calificaciones, guardados y me_gusta de esos apuntes
+        cursor.execute("""
+            DELETE c FROM Calificacion c
+            JOIN Apunte a ON c.id_apunte = a.id
+            WHERE a.id_curso = %s
+        """, (id_curso,))
+        cursor.execute("""
+            DELETE g FROM Guardado g
+            JOIN Apunte a ON g.id_apunte = a.id
+            WHERE a.id_curso = %s
+        """, (id_curso,))
+        cursor.execute("""
+            DELETE mg FROM me_gusta mg
+            JOIN Apunte a ON mg.id_apunte = a.id
+            WHERE a.id_curso = %s
+        """, (id_curso,))
+
         # 3. Borrar apuntes del curso
         cursor.execute("DELETE FROM Apunte WHERE id_curso = %s", (id_curso,))
 

@@ -65,10 +65,12 @@ def listar_apuntes_por_materia(id_materia, id_usuario=None, solo_aprobados=True)
             SELECT a.id, a.titulo, a.descripcion, a.estado, a.fecha_subida,
                 a.id_usuario_creador, u.nombre AS autor, u.avatar AS autor_avatar,
                 IFNULL(AVG(cal.calificacion), 0) AS promedio,
-                COUNT(DISTINCT cal.id) AS cant_calificaciones
+                COUNT(DISTINCT cal.id) AS cant_calificaciones,
+                COUNT(DISTINCT mg.id_usuario) AS me_gusta_count
             FROM Apunte a
             LEFT JOIN Usuario u ON a.id_usuario_creador = u.id
             LEFT JOIN Calificacion cal ON cal.id_apunte = a.id
+            LEFT JOIN me_gusta mg ON mg.id_apunte = a.id
             WHERE a.id_materia = %s
         """
         if solo_aprobados:
@@ -95,9 +97,15 @@ def listar_apuntes_por_materia(id_materia, id_usuario=None, solo_aprobados=True)
                 )
                 fila = cursor.fetchone()
                 ap["mi_calificacion"] = fila["calificacion"] if fila else 0
+                cursor.execute(
+                    "SELECT 1 FROM me_gusta WHERE id_usuario = %s AND id_apunte = %s",
+                    (id_usuario, ap["id"]),
+                )
+                ap["mi_me_gusta"] = cursor.fetchone() is not None
             else:
                 ap["guardado"] = False
                 ap["mi_calificacion"] = 0
+                ap["mi_me_gusta"] = False
         return apuntes
     except Exception as e:
         print(f"Error al listar apuntes: {e}")
@@ -185,6 +193,7 @@ def eliminar_apunte(id_apunte, carpeta_apuntes):
         # Borrar dependencias primero (FKs)
         cursor.execute("DELETE FROM Calificacion WHERE id_apunte = %s", (id_apunte,))
         cursor.execute("DELETE FROM Guardado WHERE id_apunte = %s", (id_apunte,))
+        cursor.execute("DELETE FROM me_gusta WHERE id_apunte = %s", (id_apunte,))
         cursor.execute("DELETE FROM Archivo_Apunte WHERE id_apunte = %s", (id_apunte,))
         cursor.execute("DELETE FROM Apunte WHERE id = %s", (id_apunte,))
         conn.commit()

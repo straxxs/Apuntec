@@ -1,4 +1,5 @@
-document.getElementById("registroForm").addEventListener("submit", function (e) {
+const regForm = document.getElementById("registroForm");
+if (regForm) regForm.addEventListener("submit", function (e) {
     e.preventDefault();
     fetch("/registro", { method: "POST", body: new FormData(this) })
         .then(res => res.json())

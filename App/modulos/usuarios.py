@@ -9,7 +9,7 @@ def listar_usuarios():
     cursor = conn.cursor(pymysql.cursors.DictCursor)
     try:
         cursor.execute("""
-            SELECT u.id, u.nombre, u.rol, u.id_curso, u.avatar,
+            SELECT u.id, u.nombre, u.email, u.rol, u.estado, u.id_curso, u.avatar,
                 c.anio, c.division
             FROM Usuario u
             LEFT JOIN Curso c ON u.id_curso = c.id
@@ -54,7 +54,7 @@ def obtener_usuario(id_usuario):
     cursor = conn.cursor(pymysql.cursors.DictCursor)
     try:
         cursor.execute("""
-            SELECT u.id, u.nombre, u.rol, u.id_curso, u.avatar,
+            SELECT u.id, u.nombre, u.email, u.rol, u.estado, u.id_curso, u.avatar,
                 c.anio, c.division
             FROM Usuario u
             LEFT JOIN Curso c ON u.id_curso = c.id
@@ -120,6 +120,54 @@ def ascender_a_moderador(id_usuario, id_curso):
         return cursor.rowcount > 0
     except Exception as e:
         print(f"Error al ascender a moderador: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def cambiar_estado_usuario(id_usuario, nuevo_estado):
+    """Bloquea o activa un usuario. nuevo_estado: 'activo' o 'bloqueado'."""
+    if nuevo_estado not in ("activo", "bloqueado"):
+        return False
+    conn = obtener_conexion()
+    if not conn:
+        return False
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE Usuario SET estado = %s WHERE id = %s",
+            (nuevo_estado, id_usuario),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error al cambiar estado: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def cambiar_rol_usuario(id_usuario, nuevo_rol):
+    """Cambia el rol de un usuario. nuevo_rol: 'alumno', 'moderador' o 'admin'."""
+    if nuevo_rol not in ("alumno", "moderador", "admin"):
+        return False
+    conn = obtener_conexion()
+    if not conn:
+        return False
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE Usuario SET rol = %s WHERE id = %s",
+            (nuevo_rol, id_usuario),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error al cambiar rol: {e}")
         conn.rollback()
         return False
     finally:

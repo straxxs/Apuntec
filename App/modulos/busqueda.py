@@ -2,11 +2,13 @@ import pymysql
 from db.conexion import obtener_conexion
 
 
-def buscar_apuntes(id_curso, texto="", orden="recientes"):
+def buscar_apuntes(id_curso, texto="", orden="recientes", materia_id=None, fecha_desde=None, fecha_hasta=None):
     """
-    Busca apuntes APROBADOS dentro de un curso.
+    Busca apuntes APROBADOS dentro de un curso con filtros combinados.
     - texto: filtra por título, autor o materia (LIKE).
-    - orden: 'recientes' (default) o 'valorados' (mejor promedio).
+    - orden: 'recientes' o 'valorados'.
+    - materia_id: filtra por materia específica.
+    - fecha_desde/fecha_hasta: rango de fechas.
     """
     conn = obtener_conexion()
     if not conn:
@@ -33,11 +35,23 @@ def buscar_apuntes(id_curso, texto="", orden="recientes"):
             sql += " AND (a.titulo LIKE %s OR u.nombre LIKE %s OR m.nombre LIKE %s)"
             params += [like, like, like]
 
+        if materia_id:
+            sql += " AND a.id_materia = %s"
+            params.append(materia_id)
+
+        if fecha_desde:
+            sql += " AND a.fecha_subida >= %s"
+            params.append(fecha_desde)
+
+        if fecha_hasta:
+            sql += " AND a.fecha_subida <= %s"
+            params.append(fecha_hasta + " 23:59:59")
+
         sql += " GROUP BY a.id"
 
         if orden == "valorados":
             sql += " ORDER BY promedio DESC, cant_calificaciones DESC, a.fecha_subida DESC"
-        else:  # recientes
+        else:
             sql += " ORDER BY a.fecha_subida DESC"
 
         cursor.execute(sql, tuple(params))

@@ -732,3 +732,99 @@ th {
     0%   { box-shadow: 0 0 0 4px var(--amarillo-dark); }
     100% { box-shadow: 0 0 0 3px transparent, 0 10px 26px rgba(40, 52, 74, 0.10); }
 }
+
+/* ==================== STATS GRID (RF-10) ==================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.stat-box {
+    text-align: center;
+    padding: 18px 12px;
+    border-radius: 14px;
+    background: var(--crema);
+    border: 2px solid #EEF1F5;
+}
+
+.stat-num {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tinta-soft);
+    margin-top: 4px;
+}
+
+.stat-celeste .stat-num { color: var(--celeste-dark); }
+.stat-verde .stat-num { color: var(--verde-dark); }
+.stat-rojo .stat-num { color: var(--rojo-dark); }
+.stat-amarillo .stat-num { color: var(--amarillo-dark); }
+
+/* ==================== SELECT DE ROLES (RF-09) ==================== */
+.select-rol {
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 2px solid #E2E6ED;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tinta);
+    background: var(--blanco);
+    cursor: pointer;
+}
+
+.select-rol:focus {
+    outline: none;
+    border-color: var(--celeste-dark);
+}
+
+/* ==================== BOTÓN ME GUSTA (RF-07) ==================== */
+.btn-megusta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 2px solid #E2E6ED;
+    border-radius: 20px;
+    background: var(--blanco);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.btn-megusta:hover {
+    border-color: var(--celeste);
+    background: rgba(79, 195, 232, 0.08);
+}
+
+.btn-megusta.activo {
+    border-color: var(--celeste-dark);
+    background: rgba(79, 195, 232, 0.15);
+}
+
+.btn-megusta .megusta-icono {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.btn-megusta.activo .megusta-icono {
+    transform: scale(1.2);
+}
+
+.btn-megusta .megusta-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--tinta-soft);
+}
+
+.btn-megusta.activo .megusta-count {
+    color: var(--celeste-dark);
+}

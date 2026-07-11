@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ materia.nombre }} - Apuntec</title>
+    <title>{{ materia.nombre }} - KIROKU</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
 </head>
 <body data-id-materia="{{ materia.id }}"
     data-puede-gestionar="{{ 'true' if puede_gestionar else 'false' }}">
 
 <div class="topbar">
-    <a href="/home" class="apuntec-btn"><h1>📚 Apuntti</h1></a>
+    <a href="/home" class="apuntec-btn"><h1>KIROKU</h1></a>
     <div class="perfil-menu">
         <img id="perfilAvatar" class="perfil-avatar"
             src="{{ url_for('static', filename=session_avatar) }}" alt="Mi avatar">

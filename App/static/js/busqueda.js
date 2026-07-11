@@ -1,19 +1,51 @@
-// ---------- Motor de búsqueda (home) ----------
+// ---------- Motor de búsqueda (home) con filtros avanzados ----------
 const inputBusqueda = document.getElementById("q");
 const selectOrden = document.getElementById("orden");
+const selectMateria = document.getElementById("filtroMateria");
+const inputFechaDesde = document.getElementById("fechaDesde");
+const inputFechaHasta = document.getElementById("fechaHasta");
 const btnBuscar = document.getElementById("btnBuscar");
 const contResultados = document.getElementById("resultadosBusqueda");
 
 const EXT_IMG_B = ["png", "jpg", "jpeg", "webp", "gif"];
 
+// Cargar materias del curso para el filtro
+function cargarMateriasFiltro() {
+    const body = document.body;
+    const idCurso = body?.dataset?.idCurso;
+    if (!idCurso || !selectMateria) return;
+
+    fetch(`/cursos/${idCurso}/materias`)
+        .then(res => res.json())
+        .then(data => {
+            selectMateria.innerHTML = '<option value="">Todas las materias</option>';
+            if (data.materias) {
+                data.materias.forEach(m => {
+                    const opt = document.createElement("option");
+                    opt.value = m.id;
+                    opt.textContent = m.nombre;
+                    selectMateria.appendChild(opt);
+                });
+            }
+        });
+}
+
 function hacerBusqueda() {
     if (!contResultados) return;
     const q = (inputBusqueda?.value || "").trim();
     const orden = selectOrden?.value || "recientes";
+    const materiaId = selectMateria?.value || "";
+    const fechaDesde = inputFechaDesde?.value || "";
+    const fechaHasta = inputFechaHasta?.value || "";
 
     contResultados.innerHTML = '<p class="vacio">Buscando...</p>';
 
-    fetch(`/buscar?q=${encodeURIComponent(q)}&orden=${encodeURIComponent(orden)}`)
+    const params = new URLSearchParams({ q, orden });
+    if (materiaId) params.set("materia_id", materiaId);
+    if (fechaDesde) params.set("fecha_desde", fechaDesde);
+    if (fechaHasta) params.set("fecha_hasta", fechaHasta);
+
+    fetch(`/buscar?${params.toString()}`)
         .then(res => res.json())
         .then(data => {
             if (!data.ok) {
@@ -27,7 +59,6 @@ function hacerBusqueda() {
 
             contResultados.innerHTML = "";
             data.apuntes.forEach(a => {
-                // Mini preview de la primera imagen, si hay
                 const primerArchivo = (a.archivos || [])[0];
                 let miniatura = "";
                 if (primerArchivo && EXT_IMG_B.includes((primerArchivo.tipo || "").toLowerCase())) {
@@ -48,16 +79,16 @@ function hacerBusqueda() {
                         <div style="flex:1;">
                             <div class="autor-linea" style="margin-bottom:4px;">
                                 ${htmlAvatar(a.autor, a.autor_avatar, "avatar-chico")}
-                                <strong>${a.autor || "Anónimo"}</strong>
+                                <strong>${escapeHtml(a.autor || "Anónimo")}</strong>
                                 <span class="valoracion-promedio">
                                     · ⭐ ${a.promedio} (${a.cant_calificaciones})
                                 </span>
                             </div>
-                            <h3 style="margin:4px 0;color:var(--tinta);">${a.titulo || "(sin título)"}</h3>
+                            <h3 style="margin:4px 0;color:var(--tinta);">${escapeHtml(a.titulo || "(sin título)")}</h3>
                             <p style="color:var(--tinta-soft);margin:2px 0;">
-                                ${a.materia || "Sin materia"}
+                                ${escapeHtml(a.materia || "Sin materia")}
                             </p>
-                            <p style="margin:4px 0;">${a.descripcion || "<em>Sin descripción</em>"}</p>
+                            <p style="margin:4px 0;">${escapeHtml(a.descripcion || "")}</p>
                             <a href="/materia/${a.id_materia}#apunte-${a.id}"
                                class="btn btn-celeste btn-chico">Ver apunte</a>
                         </div>
@@ -72,15 +103,14 @@ function hacerBusqueda() {
 
 if (btnBuscar) {
     btnBuscar.addEventListener("click", hacerBusqueda);
-
-    // Buscar con Enter
     inputBusqueda?.addEventListener("keydown", (e) => {
         if (e.key === "Enter") { e.preventDefault(); hacerBusqueda(); }
     });
-
-    // Rebuscar al cambiar el orden
     selectOrden?.addEventListener("change", hacerBusqueda);
+    selectMateria?.addEventListener("change", hacerBusqueda);
+    inputFechaDesde?.addEventListener("change", hacerBusqueda);
+    inputFechaHasta?.addEventListener("change", hacerBusqueda);
 
-    // Búsqueda inicial (muestra todo el curso)
+    cargarMateriasFiltro();
     hacerBusqueda();
 }

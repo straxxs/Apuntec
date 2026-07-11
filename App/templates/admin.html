@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - Apuntec</title>
+    <title>Panel Admin - KIROKU</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
 </head>
 <body>
 
 <div class="topbar">
-    <a href="/home" class="apuntec-btn"><h1>📚 Apuntti</h1></a>
+    <a href="/home" class="apuntec-btn"><h1>KIROKU</h1></a>
     <div class="perfil-menu">
         <img id="perfilAvatar" class="perfil-avatar"
             src="{{ url_for('static', filename=session_avatar) }}" alt="Mi avatar">
@@ -19,6 +19,7 @@
             <a href="/perfil">Mi perfil</a>
             <a href="/home">Inicio</a>
             {% if rol == 'admin' %}<a href="/admin">Panel admin</a>{% endif %}
+            {% if rol == 'admin' %}<a href="/admin/estadisticas">Estadísticas</a>{% endif %}
             <hr>
             <a href="/logout" class="item-logout">Cerrar sesión</a>
         </div>
@@ -30,9 +31,9 @@
     <div class="card">
         <h2>Usuarios</h2>
         <table>
-            <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th><th>Curso</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th><th>Estado</th><th>Curso</th><th>Acciones</th></tr></thead>
             <tbody id="tablaUsuarios">
-                <tr><td colspan="5" class="vacio">Cargando...</td></tr>
+                <tr><td colspan="6" class="vacio">Cargando...</td></tr>
             </tbody>
         </table>
     </div>

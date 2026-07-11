@@ -159,6 +159,13 @@ function cargarApuntes() {
                         </label>
                         `;
 
+                const btnMeGusta = `
+                    <button class="btn-megusta ${a.mi_me_gusta ? 'activo' : ''}"
+                        onclick="toggleMeGusta(${a.id}, this)" title="Me gusta">
+                        <span class="megusta-icono">👍</span>
+                        <span class="megusta-count">${a.me_gusta_count || 0}</span>
+                    </button>`;
+
                 const div = document.createElement("div");
                 div.className = "card";
                 div.style.marginBottom = "14px";
@@ -166,12 +173,12 @@ function cargarApuntes() {
                 div.innerHTML = `
                     <div class="autor-linea">
                         ${htmlAvatar(a.autor, a.autor_avatar, "avatar-chico")}
-                        <strong>${a.autor || "Anónimo"}</strong>
+                        <strong>${escapeHtml(a.autor || "Anónimo")}</strong>
                         ${a.estado && a.estado !== 'aprobado'
-                            ? `<span class="badge-rol rol-alumno">${a.estado}</span>` : ""}
+                            ? `<span class="badge-rol rol-alumno">${escapeHtml(a.estado)}</span>` : ""}
                     </div>
-                    <h3 style="margin:6px 0;color:var(--tinta);">${a.titulo || "(sin título)"}</h3>
-                    <p>${a.descripcion || "<em>Sin descripción</em>"}</p>
+                    <h3 style="margin:6px 0;color:var(--tinta);">${escapeHtml(a.titulo || "(sin título)")}</h3>
+                    <p>${escapeHtml(a.descripcion || "")}</p>
                     <div class="preview-grid">${previews}</div>
 
                     <div class="valoracion-fila">
@@ -179,6 +186,7 @@ function cargarApuntes() {
                         <span class="valoracion-promedio">
                             ${a.promedio} / 5 (${a.cant_calificaciones})
                         </span>
+                        ${btnMeGusta}
                         ${btnGuardar}
                     </div>
 
@@ -205,7 +213,8 @@ function borrarApunte(id) {
         .then(data => {
             mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) cargarApuntes();
-        });
+        })
+        .catch(() => mostrarToast("Error de conexión", "error"));
 }
 
 
@@ -325,13 +334,28 @@ function toggleGuardar(idApunte, checkbox) {
             if (data.ok) {
                 checkbox.checked = (data.estado === "guardado");
             } else {
-                checkbox.checked = !checkbox.checked; // revertir
+                checkbox.checked = !checkbox.checked;
             }
         })
         .catch(() => {
             checkbox.checked = !checkbox.checked;
             mostrarToast("Error de conexión", "error");
         });
+}
+
+// ---------- Me Gusta ----------
+function toggleMeGusta(idApunte, boton) {
+    fetch(`/apuntes/${idApunte}/me-gusta`, { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
+            if (data.ok) {
+                boton.classList.toggle("activo", data.estado === "gustado");
+                const countEl = boton.querySelector(".megusta-count");
+                if (countEl) countEl.textContent = data.cantidad;
+            }
+        })
+        .catch(() => mostrarToast("Error de conexión", "error"));
 }
 
 cargarApuntes();

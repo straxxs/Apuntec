@@ -150,3 +150,75 @@ def listar_guardados(id_alumno):
     finally:
         cursor.close()
         conn.close()
+
+
+# ---------------- ME GUSTA (likes) ----------------
+
+def alternar_me_gusta(id_usuario, id_apunte):
+    """Si ya le dio me gusta lo quita, si no lo agrega. Devuelve 'gustado' o 'quitado'."""
+    conn = obtener_conexion()
+    if not conn:
+        return None
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT 1 FROM me_gusta WHERE id_usuario = %s AND id_apunte = %s",
+            (id_usuario, id_apunte),
+        )
+        if cursor.fetchone():
+            cursor.execute(
+                "DELETE FROM me_gusta WHERE id_usuario = %s AND id_apunte = %s",
+                (id_usuario, id_apunte),
+            )
+            conn.commit()
+            return "quitado"
+        else:
+            cursor.execute(
+                "INSERT INTO me_gusta(id_usuario, id_apunte) VALUES (%s, %s)",
+                (id_usuario, id_apunte),
+            )
+            conn.commit()
+            return "gustado"
+    except Exception as e:
+        print(f"Error al alternar me gusta: {e}")
+        conn.rollback()
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def contar_me_gusta(id_apunte):
+    """Devuelve la cantidad de 'me gusta' de un apunte."""
+    conn = obtener_conexion()
+    if not conn:
+        return 0
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT COUNT(*) FROM me_gusta WHERE id_apunte = %s", (id_apunte,))
+        return cursor.fetchone()[0]
+    except Exception as e:
+        print(f"Error: {e}")
+        return 0
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def me_gusta_de(id_usuario, id_apunte):
+    """Devuelve True si el usuario le dio me gusta al apunte."""
+    conn = obtener_conexion()
+    if not conn:
+        return False
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT 1 FROM me_gusta WHERE id_usuario = %s AND id_apunte = %s",
+            (id_usuario, id_apunte),
+        )
+        return cursor.fetchone() is not None
+    except Exception:
+        return False
+    finally:
+        cursor.close()
+        conn.close()

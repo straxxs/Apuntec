@@ -5,7 +5,7 @@ const PUEDE_GESTIONAR = document.body.dataset.puedeGestionar === "true";
 
 // ---------- Materias ----------
 function cargarMaterias() {
-    fetch(`/cursos/${ID_CURSO}/materias`)
+        fetch(`/cursos/${ID_CURSO}/materias`)
         .then(res => res.json())
         .then(data => {
             const tabla = document.getElementById("tablaMaterias");
@@ -36,8 +36,8 @@ function cargarMaterias() {
                 }
 
                 tr.innerHTML = `
-                    <td>${m.nombre}</td>
-                    <td>${m.nombre_profesor || "-"}</td>
+                    <td>${escapeHtml(m.nombre)}</td>
+                    <td>${escapeHtml(m.nombre_profesor || "-")}</td>
                     <td class="acciones">${acciones}</td>`;
                 tabla.appendChild(tr);
             });
@@ -71,10 +71,10 @@ function cargarAlumnos() {
                 li.innerHTML = `
                     <span class="autor-linea" style="margin-bottom:0;">
                         ${htmlAvatar(a.nombre, a.avatar, "avatar-chico")}
-                        <span>${a.nombre}</span>
+                        <span>${escapeHtml(a.nombre)}</span>
                     </span>
                     <span style="display:flex;align-items:center;gap:8px;">
-                        <span class="badge-rol rol-${a.rol}">${a.rol}</span>
+                        <span class="badge-rol rol-${escapeHtml(a.rol)}">${escapeHtml(a.rol)}</span>
                         ${boton}
                     </span>`;
                 lista.appendChild(li);
@@ -95,7 +95,8 @@ if (formMateria) {
             .then(data => {
                 mostrarToast(data.mensaje, data.ok ? "ok" : "error");
                 if (data.ok) { this.reset(); cargarMaterias(); }
-            });
+            })
+            .catch(() => mostrarToast("Error de conexión", "error"));
     });
 }
 
@@ -115,7 +116,8 @@ function editarMateria(id, nombreActual, profesorActual) {
         .then(data => {
             mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) cargarMaterias();
-        });
+        })
+        .catch(() => mostrarToast("Error de conexión", "error"));
 }
 
 
@@ -127,7 +129,8 @@ function borrarMateria(id) {
         .then(data => {
             mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) cargarMaterias();
-        });
+        })
+        .catch(() => mostrarToast("Error de conexión", "error"));
 }
 
 
@@ -141,7 +144,8 @@ if (formEditarCurso) {
             .then(data => {
                 mostrarToast(data.mensaje, data.ok ? "ok" : "error");
                 if (data.ok) setTimeout(() => location.reload(), 800);
-            });
+            })
+            .catch(() => mostrarToast("Error de conexión", "error"));
     });
 }
 
@@ -163,7 +167,8 @@ function hacerModerador(idUsuario) {
         .then(data => {
             mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) cargarAlumnos();
-        });
+        })
+        .catch(() => mostrarToast("Error de conexión", "error"));
 }
 // ---------- Apuntes pendientes (moderación) ----------
 function cargarPendientes() {
@@ -188,9 +193,9 @@ function cargarPendientes() {
                 div.className = "card";
                 div.style.marginBottom = "12px";
                 div.innerHTML = `
-                    <strong>${a.titulo}</strong> — <em>${a.materia || ""}</em><br>
-                    <span>Por ${a.autor}</span>
-                    <p>${a.descripcion || ""}</p>
+                    <strong>${escapeHtml(a.titulo)}</strong> — <em>${escapeHtml(a.materia || "")}</em><br>
+                    <span>Por ${escapeHtml(a.autor)}</span>
+                    <p>${escapeHtml(a.descripcion || "")}</p>
                     <div class="acciones">
                         ${archivos}
                         <button class="btn btn-amarillo btn-chico" onclick="aprobar(${a.id})">✅ Aprobar</button>
@@ -204,13 +209,15 @@ function cargarPendientes() {
 function aprobar(id) {
     fetch(`/apuntes/${id}/aprobar`, { method: "POST" })
         .then(res => res.json())
-        .then(data => { mostrarToast(data.mensaje, data.ok ? "ok" : "error"); if (data.ok) cargarPendientes(); });
+        .then(data => { mostrarToast(data.mensaje, data.ok ? "ok" : "error"); if (data.ok) cargarPendientes(); })
+        .catch(() => mostrarToast("Error de conexión", "error"));
 }
 
 function rechazar(id) {
     fetch(`/apuntes/${id}/rechazar`, { method: "POST" })
         .then(res => res.json())
-        .then(data => { mostrarToast(data.mensaje, data.ok ? "ok" : "error"); if (data.ok) cargarPendientes(); });
+        .then(data => { mostrarToast(data.mensaje, data.ok ? "ok" : "error"); if (data.ok) cargarPendientes(); })
+        .catch(() => mostrarToast("Error de conexión", "error"));
 }
 
 cargarMaterias();

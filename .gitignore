@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Uploads (datos de usuarios)
+App/uploads/apuntes/*
+App/uploads/avatares/*
+!App/uploads/avatares/no_avatar.png
+!App/uploads/avatares/avatar*.png
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Misc
+*.log
+.env

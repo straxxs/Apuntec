@@ -1,4 +1,5 @@
-document.getElementById("loginForm").addEventListener("submit", function (e) {
+const loginForm = document.getElementById("loginForm");
+if (loginForm) loginForm.addEventListener("submit", function (e) {
     e.preventDefault();
     fetch("/login", { method: "POST", body: new FormData(this) })
         .then(res => res.json())

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - KIROKU</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -27,8 +27,8 @@
 
     <form id="loginForm">
         <div class="campo">
-            <label for="nombre">Usuario</label>
-            <input type="text" id="nombre" name="nombre" placeholder="tu_usuario" required>
+            <label for="nombre">Usuario o email</label>
+            <input type="text" id="nombre" name="nombre" placeholder="tu_usuario o tu@email.com" required>
         </div>
         <div class="campo">
             <label for="contraseña">Contraseña</label>
@@ -37,6 +37,7 @@
         <button type="submit" class="btn-enviar">Ingresar</button>
     </form>
 
+    <p class="enlace-secundario"><a href="/recuperar">¿Olvidaste tu contraseña?</a></p>
     <p class="enlace-secundario">¿No tenés cuenta? <a href="/registro">Creala acá</a></p>
 </div>
 

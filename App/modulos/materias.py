@@ -134,6 +134,23 @@ def eliminar_materia(id_materia, carpeta_apuntes):
             WHERE a.id_materia = %s
         """, (id_materia,))
 
+        # 2b. Borrar calificaciones, guardados y me_gusta de esos apuntes
+        cursor.execute("""
+            DELETE c FROM Calificacion c
+            JOIN Apunte a ON c.id_apunte = a.id
+            WHERE a.id_materia = %s
+        """, (id_materia,))
+        cursor.execute("""
+            DELETE g FROM Guardado g
+            JOIN Apunte a ON g.id_apunte = a.id
+            WHERE a.id_materia = %s
+        """, (id_materia,))
+        cursor.execute("""
+            DELETE mg FROM me_gusta mg
+            JOIN Apunte a ON mg.id_apunte = a.id
+            WHERE a.id_materia = %s
+        """, (id_materia,))
+
         # 3. Borrar apuntes de la materia
         cursor.execute("DELETE FROM Apunte WHERE id_materia = %s", (id_materia,))
 

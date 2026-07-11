@@ -10,5 +10,5 @@ def obtener_conexion():
         )
         return conn
     except pymysql.MySQLError as e:
-        print("error al conectar la base de datos: {e}")
+        print(f"error al conectar la base de datos: {e}")
         return None
