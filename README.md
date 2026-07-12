@@ -14,31 +14,46 @@ Kiroku es una plataforma desarrollada para que los estudiantes de la Escuela Té
 - **Subida de apuntes** (PDF, imágenes, videos, documentos) con drag & drop
 - **Búsqueda avanzada** por materia, fecha, autor y palabras clave
 - **Descarga de archivos** directa
+- **Vista previa de archivos** en apuntes (imágenes, PDF embebido, video)
 - **Valoraciones** con sistema de estrellas (1-5) y botón "Me Gusta"
 - **Sistema de guardados** para apuntes favoritos
 - **Aprobación de contenido** por moderadores (pendiente → aprobado/rechazado)
 - **Panel de administración**: gestión de usuarios (bloquear/activar, asignar roles)
 - **Dashboard de estadísticas** con gráficos (Chart.js): métricas, ranking de colaboradores
+- **Estadísticas por curso**: resumen, heatmap de actividad, ranking de colaboradores, top valorados
 - **Sistema de auditoría** (logs con usuario, acción, timestamp)
-- **Perfiles** con selección de avatar
+- **Perfiles** con selección de avatar e información del curso
+- **Código de invitación** para unirse a cursos (formato XXXX-XXXX)
+- **Modales custom** (kirokuConfirm / kirokuEdit) con estilo post-it
+- **Efectos de sonido** sutiles (Web Audio API) en interacciones clave
+- **Doodles animados** de fondo (emoji flotantes)
+- **Diseño responsive** optimizado para móvil
 
 ### Roles
 | Rol | Permisos |
 |-----|----------|
 | Alumno | Subir apuntes, buscar, valorar, descargar, guardar |
-| Moderador | Aprobar/rechazar contenido, gestionar materias de su curso |
+| Moderador | Aprobar/rechazar contenido, gestionar materias de su curso, ver estadísticas del curso |
 | Administrador | Gestión total de usuarios, roles y estadísticas |
+
+### Estética visual
+- Diseño **post-it** con papel de fondo, cintas adhesivas y sombras
+- Tipografías **Kalam** (headings) + **Nunito** (body)
+- Paleta: celeste, amarillo, verde, rojo, violeta
+- Botones con borde, rotación sutil, y efecto press
 
 ## Stack Tecnológico
 
 | Componente | Tecnología |
 |------------|-----------|
-| Backend | Python 3 + Flask |
-| Base de datos | MySQL / MariaDB (XAMPP) |
+| Backend | Python 3.14.5 + Flask |
+| Base de datos | MySQL / MariaDB 10.4.32 (XAMPP) |
 | Autenticación | bcrypt (hash) + JWT (sesiones HTTP-only) |
 | Frontend | HTML5, CSS3, JavaScript vanilla |
 | Gráficos | Chart.js v4 |
-| Servidor | Flask dev server |
+| Audio | Web Audio API (sonidos generados en código) |
+| Servidor | Flask dev server / Gunicorn (producción) |
+| Hosting | Render (producción) + TiDB Cloud Serverless (DB) |
 
 ## Estructura del Proyecto
 
@@ -46,25 +61,42 @@ Kiroku es una plataforma desarrollada para que los estudiantes de la Escuela Té
 Proyecto Mitingay/
 ├── App/
 │   ├── app.py                  # Rutas principales (Flask)
+│   ├── wsgi.py                 # Entry point para Gunicorn (Render)
 │   ├── db/
-│   │   └── conexion.py         # Conexión a MySQL
+│   │   └── conexion.py         # Conexión a MySQL (soporta DATABASE_URL)
 │   ├── modulos/
 │   │   ├── auth.py             # Registro, login, JWT, bcrypt
-│   │   ├── usuarios.py         # CRUD usuarios, roles, estado
-│   │   ├── cursos.py           # CRUD cursos
+│   │   ├── usuarios.py         # CRUD usuarios, roles, estado, ascender/descender
+│   │   ├── cursos.py           # CRUD cursos, códigos de invitación
 │   │   ├── materias.py         # CRUD materias
 │   │   ├── apuntes.py          # CRUD apuntes y archivos
 │   │   ├── valoraciones.py     # Estrellas, guardados, me gusta
 │   │   ├── busqueda.py         # Búsqueda avanzada
-│   │   ├── estadisticas.py     # Métricas y rankings
+│   │   ├── estadisticas.py     # Métricas, rankings, stats por curso
 │   │   ├── recuperacion.py     # Tokens de recuperación
+│   │   ├── validacion.py       # Validación de contraseña, usuario, email
 │   │   ├── auditoria.py        # Logs de auditoría
 │   │   └── profesores.py       # Gestión de profesores
 │   ├── templates/              # HTML (Jinja2)
 │   ├── static/
-│   │   ├── css/                # Estilos
-│   │   └── js/                 # JavaScript (vanilla)
-│   ├── uploads/                # Avatares y archivos subidos
+│   │   ├── css/
+│   │   │   ├── styles.css      # Estilos base (login, registro, home)
+│   │   │   └── panel.css       # Estilos del panel (post-it, cards, heatmap, responsive)
+│   │   ├── js/
+│   │   │   ├── apuntes.js      # CRUD apuntes, me gusta, guardados, lightbox
+│   │   │   ├── curso.js        # Gestión de curso, alumnos, pendientes, previews
+│   │   │   ├── home.js         # Unirse/crear curso, salir
+│   │   │   ├── admin.js        # Panel de administración
+│   │   │   ├── busqueda.js     # Búsqueda avanzada
+│   │   │   ├── modal.js        # kirokuConfirm() y kirokuEdit()
+│   │   │   ├── sounds.js       # Efectos de sonido (Web Audio API)
+│   │   │   ├── toast.js        # Notificaciones toast
+│   │   │   ├── avatar.js       # Selección de avatar + escapeHtml
+│   │   │   ├── topbar.js       # Dropdown del perfil
+│   │   │   └── ...             # Otros módulos JS
+│   │   ├── img/
+│   │   │   └── logo.png        # Logo KIROKU
+│   │   └── uploads/            # Avatares y archivos subidos
 │   ├── mitin.sql               # Script de inicialización de DB
 │   └── requirements.txt        # Dependencias Python
 ├── Documentación/              # Docs del proyecto (contrato, requerimientos, etc.)
@@ -110,6 +142,18 @@ Proyecto Mitingay/
 | testuser2 | 1234 | Administrador |
 | federico | 1234 | Moderador |
 | leon | 1234 | Alumno |
+
+## Deploy en Render (Producción)
+
+1. Crear cuenta gratis en [TiDB Cloud](https://tidbcloud.com), crear cluster Serverless y obtener el connection string
+2. Importar `mitin.sql` en TiDB Cloud (consola Chat2Query)
+3. Subir el código a GitHub
+4. Crear cuenta en [Render](https://render.com) → New Web Service → conectar repo
+5. Configurar:
+   - **Build**: `pip install -r App/requirements.txt`
+   - **Start**: `cd App && gunicorn wsgi:app`
+   - **Env vars**: `DATABASE_URL` (connection string de TiDB), `FLASK_DEBUG=0`
+6. Abrir la URL generada en el celu
 
 ## Requerimientos Cubiertos
 
