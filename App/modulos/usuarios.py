@@ -127,6 +127,30 @@ def ascender_a_moderador(id_usuario, id_curso):
         conn.close()
 
 
+def descender_a_alumno(id_usuario, id_curso, id_creador):
+    """Baja un moderador a alumno. No permite descender al creador del curso."""
+    if int(id_usuario) == int(id_creador):
+        return False
+    conn = obtener_conexion()
+    if not conn:
+        return False
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE Usuario SET rol = 'alumno' WHERE id = %s AND id_curso = %s AND rol = 'moderador'",
+            (id_usuario, id_curso),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error al descender a alumno: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def cambiar_estado_usuario(id_usuario, nuevo_estado):
     """Bloquea o activa un usuario. nuevo_estado: 'activo' o 'bloqueado'."""
     if nuevo_estado not in ("activo", "bloqueado"):

@@ -4,12 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio - KIROKU</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
 </head>
 <body data-id-curso="{{ id_curso or '' }}">
-
+<div class="doodles">
+    <span class="d1">✏️</span>
+    <span class="d2">📝</span>
+    <span class="d3">📚</span>
+    <span class="d4">⭐</span>
+    <span class="d5">📎</span>
+    <span class="d6">🗒️</span>
+    <span class="d7">🎓</span>
+    <span class="d8">💡</span>
+    <span class="d9">📖</span>
+    <span class="d10">🎨</span>
+    <span class="d11">🧪</span>
+    <span class="d12">✂️</span>
+    <span class="d13">📐</span>
+    <span class="d14">🖌️</span>
+    <span class="d15">🎒</span>
+    <span class="d16">🔢</span>
+</div>
 <div class="topbar">
-    <a href="/home" class="apuntec-btn"><h1>KIROKU</h1></a>
+    <a href="/home" class="apuntec-btn"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="" class="logo-topbar"><h1>KIROKU</h1></a>
     <div class="perfil-menu">
         <img id="perfilAvatar" class="perfil-avatar"
             src="{{ url_for('static', filename=session_avatar) }}" alt="Mi avatar">
@@ -47,14 +65,17 @@
     {% if not id_curso %}
     <div class="card">
         <h2>Unirme a un curso</h2>
-        <p>Pedile a un compañero el <strong>código del curso</strong> (su número de ID) y pegalo acá.</p>
+        <p>Pedile a un compañero el <strong>código de invitación</strong> (ej: A7B2-C9D1) y pegalo acá.</p>
         <form id="formUnirse">
             <div class="form-row">
                 <div class="campo">
-                    <label for="codigoCurso">Código del curso</label>
-                    <input type="number" id="codigoCurso" name="id_curso" placeholder="Ej: 3" required min="1">
+                    <label for="codigoCurso">Código de invitación</label>
+                    <input type="text" id="codigoCurso" name="codigo" placeholder="Ej: A7B2-C9D1" required
+                           style="text-transform:uppercase; font-family:monospace;" maxlength="9">
                 </div>
-                <button type="submit" class="btn btn-celeste">Unirme</button>
+                <div class="campo" style="display:flex;align-items:flex-end;">
+                    <button type="submit" class="btn btn-celeste" style="width:100%; transform:none;">Unirme</button>
+                </div>
             </div>
         </form>
     </div>
@@ -72,7 +93,9 @@
                     <label for="division">División</label>
                     <input type="text" id="division" name="division" placeholder="Ej: A" required>
                 </div>
-                <button type="submit" class="btn btn-amarillo">Crear curso</button>
+                <div class="campo" style="display:flex;align-items:flex-end;">
+                    <button type="submit" class="btn btn-amarillo" style="width:100%; transform:none;">Crear curso</button>
+                </div>
             </div>
         </form>
     </div>
@@ -109,7 +132,9 @@
                 <label for="fechaHasta">Fecha hasta</label>
                 <input type="date" id="fechaHasta">
             </div>
-            <button type="button" id="btnBuscar" class="btn btn-celeste">Buscar</button>
+            <div class="campo" style="display:flex;align-items:flex-end;">
+                <button type="button" id="btnBuscar" class="btn btn-celeste" style="width:100%;">Buscar</button>
+            </div>
         </div>
         <div id="resultadosBusqueda" style="margin-top:16px;">
             <p class="vacio">Escribí algo o presioná Buscar para ver los apuntes de tu curso.</p>
@@ -122,7 +147,9 @@
 <script src="{{ url_for('static', filename='js/busqueda.js') }}"></script>
 <script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/topbar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sounds.js') }}"></script>
 <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
 </html>

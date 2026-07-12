@@ -1,6 +1,48 @@
 // ---------- Datos del curso (leídos del <body>) ----------
 const ID_CURSO = document.body.dataset.idCurso;
 const PUEDE_GESTIONAR = document.body.dataset.puedeGestionar === "true";
+const ID_CREADOR = document.body.dataset.idCreador;
+const ID_USUARIO = document.body.dataset.idUsuario;
+const ES_CREADOR = String(ID_CREADOR) === String(ID_USUARIO);
+
+const EXT_IMG = ["png", "jpg", "jpeg", "webp", "gif"];
+const EXT_VIDEO = ["mp4", "webm", "ogg"];
+const ICONOS = {
+    pdf: "📕", doc: "📘", docx: "📘", txt: "📄",
+    pptx: "📙", ppt: "📙", xlsx: "📗", xls: "📗",
+};
+
+// ---------- Preview de archivo ----------
+function htmlPreviewMini(f) {
+    const url = `/static/${f.ruta}`;
+    const tipo = (f.tipo || "").toLowerCase();
+
+    if (EXT_IMG.includes(tipo)) {
+        return `<div class="preview-item"><img class="preview-img" src="${url}" alt="imagen" onclick="abrirLightbox('${url}')" style="cursor:pointer;"></div>`;
+    }
+    if (tipo === "pdf") {
+        return `<div class="preview-item"><iframe class="preview-pdf" src="${url}#toolbar=0"></iframe></div>`;
+    }
+    if (EXT_VIDEO.includes(tipo)) {
+        return `<div class="preview-item"><video class="preview-video" controls src="${url}"></video></div>`;
+    }
+    const icono = ICONOS[tipo] || "📎";
+    return `<div class="preview-item"><div class="preview-generico"><div class="icono">${icono}</div><div class="nombre">Archivo ${tipo}</div></div></div>`;
+}
+
+function abrirLightbox(url) {
+    let lb = document.getElementById("lightbox");
+    if (!lb) {
+        lb = document.createElement("div");
+        lb.id = "lightbox";
+        lb.className = "lightbox";
+        lb.innerHTML = `<span class="lightbox-cerrar">&times;</span><img src="" alt="ampliada">`;
+        document.body.appendChild(lb);
+        lb.addEventListener("click", () => lb.classList.remove("abierto"));
+    }
+    lb.querySelector("img").src = url;
+    lb.classList.add("abierto");
+}
 
 
 // ---------- Materias ----------
@@ -12,7 +54,7 @@ function cargarMaterias() {
             tabla.innerHTML = "";
 
             if (!data.materias || data.materias.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="3" class="vacio">No hay materias todavía.</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="3" class="vacio">No hay materias todavía. Pedile a un moderador que agregue una.</td></tr>';
                 return;
             }
 
@@ -62,10 +104,12 @@ function cargarAlumnos() {
                 const li = document.createElement("li");
 
                 let boton = "";
-                // Solo el que gestiona puede ascender, y solo a alumnos
-                if (PUEDE_GESTIONAR && a.rol === "alumno") {
+                if (ES_CREADOR && a.rol === "alumno") {
                     boton = `<button class="btn btn-celeste btn-chico"
                                 onclick="hacerModerador(${a.id})">Hacer moderador</button>`;
+                } else if (ES_CREADOR && a.rol === "moderador" && String(a.id) !== String(ID_CREADOR)) {
+                    boton = `<button class="btn btn-rojo btn-chico"
+                                onclick="bajarModerador(${a.id})">Quitar moderador</button>`;
                 }
 
                 li.innerHTML = `
@@ -88,6 +132,7 @@ const formMateria = document.getElementById("formMateria");
 if (formMateria) {
     formMateria.addEventListener("submit", function (e) {
         e.preventDefault();
+        if (!this.reportValidity()) return;
         const fd = new FormData(this);
         fd.append("id_curso", ID_CURSO);
         fetch("/materias/crear", { method: "POST", body: fd })
@@ -102,14 +147,16 @@ if (formMateria) {
 
 
 // ---------- Editar materia ----------
-function editarMateria(id, nombreActual, profesorActual) {
-    const nombre = prompt("Nuevo nombre de la materia:", nombreActual);
-    if (nombre === null) return;
-    const profesor = prompt("Nombre del profesor (vacío = sin profesor):", profesorActual);
+async function editarMateria(id, nombreActual, profesorActual) {
+    const valores = await kirokuEdit("✏️", "Editar materia", [
+        { id: "nombre", label: "Nombre de la materia", valor: nombreActual, placeholder: "Ej: Matemática" },
+        { id: "profesor", label: "Profesor/a", valor: profesorActual, placeholder: "Vacío = sin profesor" }
+    ]);
+    if (!valores) return;
 
     const fd = new FormData();
-    fd.append("nombre", nombre);
-    fd.append("profesor", profesor || "");
+    fd.append("nombre", valores.nombre);
+    fd.append("profesor", valores.profesor || "");
 
     fetch(`/materias/editar/${id}`, { method: "POST", body: fd })
         .then(res => res.json())
@@ -122,8 +169,9 @@ function editarMateria(id, nombreActual, profesorActual) {
 
 
 // ---------- Borrar materia ----------
-function borrarMateria(id) {
-    if (!confirm("¿Eliminar esta materia? Se perderán sus apuntes.")) return;
+async function borrarMateria(id) {
+    const ok = await kirokuConfirm("🗑️", "Eliminar materia", "Se perderán todos sus apuntes. ¿Continuar?", "Eliminar", "Cancelar");
+    if (!ok) return;
     fetch(`/materias/eliminar/${id}`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
@@ -139,6 +187,7 @@ const formEditarCurso = document.getElementById("formEditarCurso");
 if (formEditarCurso) {
     formEditarCurso.addEventListener("submit", function (e) {
         e.preventDefault();
+        if (!this.reportValidity()) return;
         fetch(`/cursos/editar/${ID_CURSO}`, { method: "POST", body: new FormData(this) })
             .then(res => res.json())
             .then(data => {
@@ -158,8 +207,9 @@ function copiarCodigo(codigo) {
 }
 
 // ---------- Ascender alumno a moderador ----------
-function hacerModerador(idUsuario) {
-    if (!confirm("¿Convertir a este alumno en moderador del curso?")) return;
+async function hacerModerador(idUsuario) {
+    const ok = await kirokuConfirm("👑", "Ascender a moderador", "¿Convertir a este alumno en moderador del curso?", "Ascender", "Cancelar");
+    if (!ok) return;
     const fd = new FormData();
     fd.append("id_usuario", idUsuario);
     fetch(`/cursos/${ID_CURSO}/ascender`, { method: "POST", body: fd })
@@ -170,6 +220,22 @@ function hacerModerador(idUsuario) {
         })
         .catch(() => mostrarToast("Error de conexión", "error"));
 }
+
+// ---------- Quitar moderador ----------
+async function bajarModerador(idUsuario) {
+    const ok = await kirokuConfirm("👤", "Quitar moderador", "¿Volver a alumno a este moderador?", "Quitar", "Cancelar");
+    if (!ok) return;
+    const fd = new FormData();
+    fd.append("id_usuario", idUsuario);
+    fetch(`/cursos/${ID_CURSO}/descender`, { method: "POST", body: fd })
+        .then(res => res.json())
+        .then(data => {
+            mostrarToast(data.mensaje, data.ok ? "ok" : "error");
+            if (data.ok) cargarAlumnos();
+        })
+        .catch(() => mostrarToast("Error de conexión", "error"));
+}
+
 // ---------- Apuntes pendientes (moderación) ----------
 function cargarPendientes() {
     if (!PUEDE_GESTIONAR) return;
@@ -186,20 +252,18 @@ function cargarPendientes() {
             }
 
             data.apuntes.forEach(a => {
-                const archivos = (a.archivos || []).map(f =>
-                    `<a class="btn btn-celeste btn-chico" href="/static/${f.ruta}" target="_blank">Ver ${f.tipo}</a>`
-                ).join(" ");
+                const previews = (a.archivos || []).map(htmlPreviewMini).join("");
                 const div = document.createElement("div");
-                div.className = "card";
+                div.className = "card card-apunte";
                 div.style.marginBottom = "12px";
                 div.innerHTML = `
                     <strong>${escapeHtml(a.titulo)}</strong> — <em>${escapeHtml(a.materia || "")}</em><br>
                     <span>Por ${escapeHtml(a.autor)}</span>
                     <p>${escapeHtml(a.descripcion || "")}</p>
-                    <div class="acciones">
-                        ${archivos}
+                    ${previews ? `<div class="preview-grid">${previews}</div>` : ""}
+                    <div class="acciones" style="margin-top:10px;">
                         <button class="btn btn-amarillo btn-chico" onclick="aprobar(${a.id})">✅ Aprobar</button>
-                        <button class="btn btn-rojo btn-chico" onclick="rechazar(${a.id})">❌ Rechazar</button>
+                        <button class="btn btn-rojo btn-chico" onclick="rechazar(${a.id})">✖ Rechazar</button>
                     </div>`;
                 cont.appendChild(div);
             });

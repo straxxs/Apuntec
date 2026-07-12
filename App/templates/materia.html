@@ -4,13 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ materia.nombre }} - KIROKU</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
 </head>
 <body data-id-materia="{{ materia.id }}"
     data-puede-gestionar="{{ 'true' if puede_gestionar else 'false' }}">
-
+<div class="doodles">
+    <span class="d1">✏️</span>
+    <span class="d2">📝</span>
+    <span class="d3">📚</span>
+    <span class="d4">⭐</span>
+    <span class="d5">📎</span>
+    <span class="d6">🗒️</span>
+    <span class="d7">🎓</span>
+    <span class="d8">💡</span>
+    <span class="d9">📖</span>
+    <span class="d10">🎨</span>
+    <span class="d11">🧪</span>
+    <span class="d12">✂️</span>
+    <span class="d13">📐</span>
+    <span class="d14">🖌️</span>
+    <span class="d15">🎒</span>
+    <span class="d16">🔢</span>
+</div>
 <div class="topbar">
-    <a href="/home" class="apuntec-btn"><h1>KIROKU</h1></a>
+    <a href="/home" class="apuntec-btn"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="" class="logo-topbar"><h1>KIROKU</h1></a>
     <div class="perfil-menu">
         <img id="perfilAvatar" class="perfil-avatar"
             src="{{ url_for('static', filename=session_avatar) }}" alt="Mi avatar">
@@ -23,6 +41,7 @@
             {% endif %}
             <a href="/home">Inicio</a>
             {% if rol == 'admin' %}<a href="/admin">Panel admin</a>{% endif %}
+            {% if rol == 'admin' %}<a href="/admin/estadisticas">Estadísticas</a>{% endif %}
             <hr>
             <a href="/logout" class="item-logout">Cerrar sesión</a>
         </div>
@@ -30,11 +49,16 @@
 </div>
 
 <div class="wrapper">
+    {% if session_id_curso %}
+    <div class="card" style="margin-bottom:12px;">
+        <a href="/curso/{{ session_id_curso }}" class="btn btn-celeste btn-chico">← Volver al curso</a>
+    </div>
+    {% endif %}
     <div class="card">
         <h2>Información de la materia</h2>
         <p><strong>{{ materia.nombre }}</strong></p>
         <p>Profesor/a: {{ materia.nombre_profesor or 'Sin asignar' }}</p>
-        <p>Curso: {{ curso.anio }}° {{ curso.division }}</p>
+        <p>Curso: {{ curso.anio }}° {{ curso.division }}°</p>
     </div>
 
         <div class="card">
@@ -52,15 +76,17 @@
             </div>
 
             <div class="campo">
-                <label>Archivos (opcional, podés subir varios)</label>
+                <label>Archivos</label>
                 <input type="file" id="archivo" name="archivo" multiple hidden>
                 <div class="file-drop" id="fileDrop">
                     <span class="file-icono">📎</span>
-                    <span class="file-texto" id="fileTexto">Elegí archivos o arrastralos acá (opcional)</span>
+                    <span class="file-texto" id="fileTexto">Elegí archivos o arrastralos acá</span>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-amarillo">Subir apunte</button>
+            <div class="campo" style="display:flex;align-items:flex-end;">
+                <button type="submit" class="btn btn-amarillo" style="width:100%; transform:none;">Subir apunte</button>
+            </div>
         </form>
     </div>
 
@@ -72,7 +98,9 @@
 
 <script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/topbar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sounds.js') }}"></script>
 <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/apuntes.js') }}"></script>
 </body>
 </html>

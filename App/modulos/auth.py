@@ -1,3 +1,4 @@
+import os
 import pymysql
 import bcrypt
 import jwt
@@ -5,7 +6,7 @@ import datetime
 import secrets
 from db.conexion import obtener_conexion
 
-JWT_SECRET = "kiroku_secret_key_2026_mitin_f8a2c3d5e7g9h1j3k5l7m9n1p3r5t7v9x1z"
+JWT_SECRET = os.environ.get("KIROKU_JWT_SECRET", "kiroku_secret_key_2026_mitin_f8a2c3d5e7g9h1j3k5l7m9n1p3r5t7v9x1z")
 JWT_EXPIRACION_HORAS = 24
 
 

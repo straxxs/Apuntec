@@ -4,12 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Curso - KIROKU</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
 </head>
-<body data-id-curso="{{ curso.id }}" data-puede-gestionar="{{ 'true' if puede_gestionar else 'false' }}">
-
+<body data-id-curso="{{ curso.id }}" data-puede-gestionar="{{ 'true' if puede_gestionar else 'false' }}" data-id-creador="{{ curso.id_creador }}" data-id-usuario="{{ id_usuario_actual }}">
+<div class="doodles">
+    <span class="d1">✏️</span>
+    <span class="d2">📝</span>
+    <span class="d3">📚</span>
+    <span class="d4">⭐</span>
+    <span class="d5">📎</span>
+    <span class="d6">🗒️</span>
+    <span class="d7">🎓</span>
+    <span class="d8">💡</span>
+    <span class="d9">📖</span>
+    <span class="d10">🎨</span>
+    <span class="d11">🧪</span>
+    <span class="d12">✂️</span>
+    <span class="d13">📐</span>
+    <span class="d14">🖌️</span>
+    <span class="d15">🎒</span>
+    <span class="d16">🔢</span>
+</div>
 <div class="topbar">
-    <a href="/home" class="apuntec-btn"><h1>KIROKU</h1></a>
+    <a href="/home" class="apuntec-btn"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="" class="logo-topbar"><h1>KIROKU</h1></a>
     <div class="perfil-menu">
         <img id="perfilAvatar" class="perfil-avatar"
             src="{{ url_for('static', filename=session_avatar) }}" alt="Mi avatar">
@@ -19,6 +37,7 @@
             <a href="/perfil">Mi perfil</a>
             <a href="/home">Inicio</a>
             {% if rol == 'admin' %}<a href="/admin">Panel admin</a>{% endif %}
+            {% if rol == 'admin' %}<a href="/admin/estadisticas">Estadísticas</a>{% endif %}
             <hr>
             <a href="/logout" class="item-logout">Cerrar sesión</a>
         </div>
@@ -31,14 +50,16 @@
     <div class="card">
         <h2>Información del curso</h2>
         <p>
-            <strong>{{ curso.anio }}° {{ curso.division }}</strong>
+            <strong>{{ curso.anio }}° {{ curso.division }}°</strong>
             &nbsp;·&nbsp; Creado por: {{ curso.creador or '-' }}
         </p>
+        {% if puede_gestionar %}
         <p>
             Código para invitar compañeros:
-            <strong style="font-size:18px; color:var(--celeste-dark);">{{ curso.id }}</strong>
-            <button class="btn btn-celeste btn-chico" onclick="copiarCodigo({{ curso.id }})">Copiar</button>
+            <strong style="font-size:18px; color:var(--celeste-dark); font-family:monospace;">{{ curso.codigo_invitacion }}</strong>
+            <button class="btn btn-celeste btn-chico" onclick="copiarCodigo('{{ curso.codigo_invitacion }}')">Copiar</button>
         </p>
+        {% endif %}
 
         {% if puede_gestionar %}
         <form id="formEditarCurso" style="margin-top:14px;">
@@ -51,9 +72,13 @@
                     <label for="editDivision">División</label>
                     <input type="text" id="editDivision" name="division" value="{{ curso.division }}" required>
                 </div>
-                <button type="submit" class="btn btn-amarillo">Guardar cambios</button>
+                <div class="campo">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-amarillo">Guardar cambios</button>
+                </div>
             </div>
         </form>
+        <a href="/curso/{{ curso.id }}/estadisticas" class="btn btn-celeste btn-chico" style="margin-top:12px;">📊 Ver estadísticas del curso</a>
         {% endif %}
     </div>
 
@@ -78,7 +103,10 @@
                     <label for="profesorMateria">Profesor (opcional)</label>
                     <input type="text" id="profesorMateria" name="profesor" placeholder="Ej: Pérez">
                 </div>
-                <button type="submit" class="btn btn-amarillo">Agregar materia</button>
+                <div class="campo">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-amarillo">Agregar materia</button>
+                </div>
             </div>
         </form>
         {% endif %}
@@ -105,7 +133,9 @@
 
 <script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/topbar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sounds.js') }}"></script>
 <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/curso.js') }}"></script>
 </body>
 </html>

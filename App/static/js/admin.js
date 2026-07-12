@@ -12,7 +12,7 @@ function cargarUsuarios() {
             }
 
             data.usuarios.forEach(u => {
-                const curso = u.anio ? `${u.anio}° ${u.division}` : "-";
+                const curso = u.anio ? `${u.anio}° ${u.division}°` : "-";
                 const tr = document.createElement("tr");
                 const estadoBadge = u.estado === "bloqueado"
                     ? '<span class="badge-rol rol-admin">bloqueado</span>'
@@ -49,8 +49,9 @@ function cargarUsuarios() {
         });
 }
 
-function borrarUsuario(id) {
-    if (!confirm("¿Seguro que querés eliminar este usuario?")) return;
+async function borrarUsuario(id) {
+    const ok = await kirokuConfirm("🗑️", "Eliminar usuario", "¿Seguro que querés eliminar este usuario? No se podrá recuperar.", "Eliminar", "Cancelar");
+    if (!ok) return;
     fetch(`/admin/usuarios/eliminar/${id}`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
@@ -113,8 +114,9 @@ function cargarCursos() {
         });
 }
 
-function borrarCurso(id) {
-    if (!confirm("¿Eliminar este curso? Se perderán sus materias y apuntes.")) return;
+async function borrarCurso(id) {
+    const ok = await kirokuConfirm("🗑️", "Eliminar curso", "Se perderán todas sus materias y apuntes. ¿Continuar?", "Eliminar", "Cancelar");
+    if (!ok) return;
     fetch(`/cursos/eliminar/${id}`, { method: "POST" })
         .then(res => res.json())
         .then(data => {

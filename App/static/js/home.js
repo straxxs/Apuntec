@@ -3,6 +3,8 @@ const formCurso = document.getElementById("formCurso");
 if (formCurso) {
     formCurso.addEventListener("submit", function (e) {
         e.preventDefault();
+        if (!this.reportValidity()) return;
+        if (typeof sonidoEnviar === "function") sonidoEnviar();
         fetch("/cursos/crear", { method: "POST", body: new FormData(this) })
             .then(res => res.json())
             .then(data => {
@@ -18,6 +20,8 @@ const formUnirse = document.getElementById("formUnirse");
 if (formUnirse) {
     formUnirse.addEventListener("submit", function (e) {
         e.preventDefault();
+        if (!this.reportValidity()) return;
+        if (typeof sonidoEnviar === "function") sonidoEnviar();
         fetch("/cursos/unirse", { method: "POST", body: new FormData(this) })
             .then(res => res.json())
             .then(data => {
@@ -31,8 +35,9 @@ if (formUnirse) {
 // ---------- Salir del curso ----------
 const btnSalir = document.getElementById("btnSalir");
 if (btnSalir) {
-    btnSalir.addEventListener("click", function () {
-        if (!confirm("¿Seguro que querés salir de tu curso?")) return;
+    btnSalir.addEventListener("click", async function () {
+        const ok = await kirokuConfirm("🚪", "Salir del curso", "¿Seguro que querés salir de tu curso?", "Salir", "Quedarme");
+        if (!ok) return;
         fetch("/cursos/salir", { method: "POST" })
             .then(res => res.json())
             .then(data => {

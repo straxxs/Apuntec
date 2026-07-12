@@ -1,6 +1,16 @@
 import os
 import pymysql
+import secrets
+import string
 from db.conexion import obtener_conexion
+
+
+def _generar_codigo_invitacion():
+    """Genera un código de invitación alfanumérico tipo XXXX-XXXX."""
+    chars = string.ascii_uppercase + string.digits
+    parte1 = ''.join(secrets.choice(chars) for _ in range(4))
+    parte2 = ''.join(secrets.choice(chars) for _ in range(4))
+    return f"{parte1}-{parte2}"
 
 
 def crear_curso(anio, division, id_creador):
@@ -16,9 +26,10 @@ def crear_curso(anio, division, id_creador):
 
     cursor = conn.cursor()
     try:
+        codigo = _generar_codigo_invitacion()
         cursor.execute(
-            "INSERT INTO Curso(anio, division, id_creador) VALUES (%s, %s, %s)",
-            (anio, division, id_creador),
+            "INSERT INTO Curso(anio, division, id_creador, codigo_invitacion) VALUES (%s, %s, %s, %s)",
+            (anio, division, id_creador, codigo),
         )
         nuevo_id = cursor.lastrowid
 
@@ -28,7 +39,7 @@ def crear_curso(anio, division, id_creador):
         )
 
         conn.commit()
-        return nuevo_id
+        return {"id": nuevo_id, "codigo": codigo}
     except Exception as e:
         print(f"Error al crear curso: {e}")
         conn.rollback()
@@ -90,7 +101,7 @@ def obtener_curso(id_curso):
     cursor = conn.cursor(pymysql.cursors.DictCursor)
     try:
         cursor.execute("""
-            SELECT c.id, c.anio, c.division, c.id_creador, u.nombre AS creador
+            SELECT c.id, c.anio, c.division, c.id_creador, c.codigo_invitacion, u.nombre AS creador
             FROM Curso c
             LEFT JOIN Usuario u ON c.id_creador = u.id
             WHERE c.id = %s

@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - KIROKU</title>
+    <title>Iniciar sesión - KIROKU</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 
-<span class="flotante flotante-1" aria-hidden="true">✏️</span>
-<span class="flotante flotante-2" aria-hidden="true">📐</span>
-<span class="flotante flotante-3" aria-hidden="true">🍎</span>
-<span class="flotante flotante-4" aria-hidden="true">⭐</span>
+<!-- Doodles decorativos -->
+<div class="doodle doodle-1" aria-hidden="true">📐</div>
+<div class="doodle doodle-2" aria-hidden="true">🖍️</div>
+<div class="doodle doodle-3" aria-hidden="true">📏</div>
+<div class="doodle doodle-4" aria-hidden="true">📎</div>
 
 <div class="container">
     <div class="badge" aria-hidden="true">🎓</div>
@@ -21,24 +23,35 @@
     </div>
 
     <div class="titulo-wrap">
-        <h2 class="titulo">¡Hola de nuevo!</h2>
-        <p class="subtitulo">Ingresá tus datos para entrar al cole</p>
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="KIROKU" class="logo-auth">
+        <p class="subtitulo">Ingresá a tu cuenta</p>
     </div>
 
-    <form id="loginForm">
+    <form id="loginForm" novalidate>
         <div class="campo">
             <label for="nombre">Usuario o email</label>
-            <input type="text" id="nombre" name="nombre" placeholder="tu_usuario o tu@email.com" required>
+            <input type="text" id="nombre" name="nombre" placeholder="tu_usuario o tu@email.com" required
+                   autocomplete="username">
         </div>
         <div class="campo">
             <label for="contraseña">Contraseña</label>
-            <input type="password" id="contraseña" name="contraseña" placeholder="••••••••" required>
+            <div class="campo-password">
+                <input type="password" id="contraseña" name="contraseña" placeholder="Tu contraseña" required
+                       autocomplete="current-password">
+                <button type="button" class="btn-toggle-pass" aria-label="Mostrar contraseña"
+                        onclick="togglePass('contraseña', this)">
+                    <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
         </div>
-        <button type="submit" class="btn-enviar">Ingresar</button>
+        <button type="submit" class="btn-enviar">Iniciar sesión</button>
     </form>
 
     <p class="enlace-secundario"><a href="/recuperar">¿Olvidaste tu contraseña?</a></p>
-    <p class="enlace-secundario">¿No tenés cuenta? <a href="/registro">Creala acá</a></p>
+    <p class="enlace-secundario">¿No tenés cuenta? <a href="/registro">Registrarse</a></p>
 </div>
 
 <script src="{{ url_for('static', filename='js/toast.js') }}"></script>

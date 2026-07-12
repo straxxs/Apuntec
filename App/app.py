@@ -1,8 +1,13 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify
+import re
+import pymysql
+from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify, send_file
 from werkzeug.utils import secure_filename
 from modulos.auth import (
     login, registrar_usuario, generar_token_jwt, verificar_token_jwt,
+)
+from modulos.validacion import (
+    validar_contraseña, validar_nombre_usuario, validar_email,
 )
 from modulos.cursos import (
     crear_curso, editar_curso, listar_cursos, eliminar_curso,
@@ -15,7 +20,7 @@ from modulos.materias import (
 )
 from modulos.usuarios import (
     listar_usuarios, eliminar_usuario,
-    obtener_usuario, actualizar_perfil, ascender_a_moderador,
+    obtener_usuario, actualizar_perfil, ascender_a_moderador, descender_a_alumno,
     cambiar_estado_usuario, cambiar_rol_usuario,
 )
 from modulos.apuntes import (
@@ -35,11 +40,14 @@ from modulos.estadisticas import (
     estadisticas_generales, apuntes_mas_valorados,
     materias_mas_consultadas, ranking_colaboradores,
     apuntes_por_estado, apuntes_por_fecha,
+    stats_curso_resumen, stats_curso_por_estado,
+    stats_curso_materias, stats_curso_ranking,
+    stats_curso_por_fecha, stats_curso_top_valorados,
 )
 from modulos.auditoria import registrar_accion
 
 app = Flask(__name__)
-app.secret_key = "kiroku_secret_key_2026_mitin"
+app.secret_key = os.environ.get("KIROKU_SECRET_KEY", "kiroku_secret_key_2026_mitin_fallback")
 
 JWT_COOKIE = "kiroku_token"
 
@@ -50,6 +58,17 @@ os.makedirs(os.path.join(app.static_folder, "uploads", "avatares"), exist_ok=Tru
 
 EXT_APUNTES = {"pdf", "png", "jpg", "jpeg", "docx", "doc", "txt", "pptx"}
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
+
+
+# ---------- Headers de seguridad ----------
+@app.after_request
+def agregar_headers_seguridad(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
 
 def extension_ok(nombre, permitidas):
     return "." in nombre and nombre.rsplit(".", 1)[1].lower() in permitidas
@@ -96,6 +115,21 @@ def _ip_cliente():
     return request.headers.get("X-Forwarded-For", request.remote_addr)
 
 
+def _obtener_curso_por_codigo(codigo):
+    """Busca un curso por su código de invitación alfanumérico."""
+    from db.conexion import obtener_conexion
+    conn = obtener_conexion()
+    if not conn:
+        return None
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    try:
+        cursor.execute("SELECT id, anio, division FROM Curso WHERE codigo_invitacion = %s", (codigo,))
+        return cursor.fetchone()
+    finally:
+        cursor.close()
+        conn.close()
+
+
 @app.context_processor
 def inyectar_usuario():
     u = _usuario_actual()
@@ -120,12 +154,31 @@ def registro():
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
         contraseña = request.form.get("contraseña", "")
+        confirmar = request.form.get("confirmar_contraseña", "")
         email = request.form.get("email", "").strip()
-        if not nombre or not contraseña or not email:
-            return jsonify({"ok": False, "mensaje": "Todos los campos son obligatorios."})
+
+        # Validar nombre de usuario
+        ok_nombre, errores_nombre = validar_nombre_usuario(nombre)
+        if not ok_nombre:
+            return jsonify({"ok": False, "mensaje": "Usuario: " + " ".join(errores_nombre)})
+
+        # Validar email
+        ok_email, errores_email = validar_email(email)
+        if not ok_email:
+            return jsonify({"ok": False, "mensaje": "Email: " + " ".join(errores_email)})
+
+        # Validar contraseña
+        ok_pass, errores_pass = validar_contraseña(contraseña)
+        if not ok_pass:
+            return jsonify({"ok": False, "mensaje": "Contraseña: " + " ".join(errores_pass)})
+
+        # Confirmar contraseña
+        if contraseña != confirmar:
+            return jsonify({"ok": False, "mensaje": "Las contraseñas no coinciden."})
+
         if registrar_usuario(nombre, contraseña, email):
             return jsonify({"ok": True, "mensaje": "¡Registro exitoso! Ahora iniciá sesión."})
-        return jsonify({"ok": False, "mensaje": "Error al registrar (el usuario quizás ya existe)."})
+        return jsonify({"ok": False, "mensaje": "El usuario o email ya está registrado."})
     return render_template("registro.html")
 
 
@@ -235,6 +288,45 @@ def panel_estadisticas():
     return render_template("estadisticas.html", nombre=u.get("nombre"))
 
 
+@app.route("/descargar/<path:ruta>")
+def descargar_archivo(ruta):
+    """Endpoint que fuerza la descarga del archivo en vez de abrirlo."""
+    if not requiere_login():
+        return redirect(url_for("login_route"))
+    seguro = os.path.basename(ruta)
+    ruta_completa = os.path.join(app.static_folder, "uploads", "apuntes", seguro)
+    if not os.path.isfile(ruta_completa):
+        return "Archivo no encontrado", 404
+    return send_file(ruta_completa, as_attachment=True)
+
+
+@app.route("/curso/<int:id_curso>/estadisticas")
+def estadisticas_curso(id_curso):
+    if not requiere_login():
+        return redirect(url_for("login_route"))
+    if not es_mi_curso(id_curso):
+        return "No tenés acceso a las estadísticas de este curso", 403
+    curso = obtener_curso(id_curso)
+    return render_template("estadisticas_curso.html", curso=curso)
+
+
+@app.route("/curso/<int:id_curso>/stats", methods=["GET"])
+def curso_stats_api(id_curso):
+    if not requiere_login():
+        return jsonify({"ok": False, "mensaje": "No autenticado"}), 401
+    if not es_mi_curso(id_curso):
+        return jsonify({"ok": False, "mensaje": "Sin permisos"}), 403
+    return jsonify({
+        "ok": True,
+        "resumen": stats_curso_resumen(id_curso),
+        "por_estado": stats_curso_por_estado(id_curso),
+        "materias": stats_curso_materias(id_curso),
+        "ranking": stats_curso_ranking(id_curso),
+        "por_fecha": stats_curso_por_fecha(id_curso),
+        "top_valorados": stats_curso_top_valorados(id_curso),
+    })
+
+
 @app.route("/curso/<int:id_curso>")
 def pagina_curso(id_curso):
     if not requiere_login():
@@ -249,6 +341,7 @@ def pagina_curso(id_curso):
         curso=curso,
         puede_gestionar=puede_gestionar,
         rol=u.get("rol"),
+        id_usuario_actual=u.get("id"),
     )
 
 
@@ -332,17 +425,19 @@ def cursos_unirse():
     if u.get("id_curso"):
         return jsonify({"ok": False, "mensaje": "Ya pertenecés a un curso. Salí primero."}), 400
 
-    id_curso = request.form.get("id_curso")
-    if not id_curso or not id_curso.isdigit():
-        return jsonify({"ok": False, "mensaje": "Código de curso inválido"}), 400
+    codigo = request.form.get("codigo", "").strip()
+    if not codigo:
+        return jsonify({"ok": False, "mensaje": "Ingresá un código de invitación"}), 400
 
-    if not obtener_curso(int(id_curso)):
-        return jsonify({"ok": False, "mensaje": "Ese curso no existe"}), 404
+    curso = _obtener_curso_por_codigo(codigo)
+    if not curso:
+        return jsonify({"ok": False, "mensaje": "Código inválido o curso no encontrado"}), 404
 
+    id_curso = curso["id"]
     if unir_usuario_a_curso(u["id"], id_curso):
-        registrar_accion(u["id"], "curso_unido", f"Curso ID: {id_curso}", _ip_cliente())
-        token = _refrescar_token_curso(u, int(id_curso))
-        resp = jsonify({"ok": True, "mensaje": "¡Te uniste al curso!", "id": int(id_curso)})
+        registrar_accion(u["id"], "curso_unido", f"Curso: {curso.get('anio')}° {curso.get('division')}° (ID: {id_curso})", _ip_cliente())
+        token = _refrescar_token_curso(u, id_curso)
+        resp = jsonify({"ok": True, "mensaje": "¡Te uniste al curso!", "id": id_curso})
         resp.set_cookie(JWT_COOKIE, token, httponly=True, samesite="Lax", max_age=86400)
         return resp
     return jsonify({"ok": False, "mensaje": "No se pudo unir"})
@@ -416,9 +511,10 @@ def cursos_crear():
     anio = request.form.get("anio")
     division = request.form.get("division")
 
-    nuevo_id = crear_curso(anio, division, u["id"])
-    if nuevo_id:
-        registrar_accion(u["id"], "curso_creado", f"Curso: {anio}° {division} (ID: {nuevo_id})", _ip_cliente())
+    resultado = crear_curso(anio, division, u["id"])
+    if resultado:
+        nuevo_id = resultado["id"]
+        registrar_accion(u["id"], "curso_creado", f"Curso: {anio}° {division}° (ID: {nuevo_id})", _ip_cliente())
         token = _refrescar_token_curso(u, nuevo_id, rol_forzado="moderador")
         resp = jsonify({
             "ok": True,
@@ -471,6 +567,29 @@ def curso_ascender(id_curso):
         registrar_accion(_usuario_actual()["id"], "usuario_ascendido", f"Usuario {id_destino} → moderador en curso {id_curso}", _ip_cliente())
         return jsonify({"ok": True, "mensaje": "¡Ahora es moderador!"})
     return jsonify({"ok": False, "mensaje": "No se pudo ascender (¿ya es moderador?)"})
+
+@app.route("/cursos/<int:id_curso>/descender", methods=["POST"])
+def curso_descender(id_curso):
+    if not requiere_login():
+        return jsonify({"ok": False, "mensaje": "No autenticado"}), 401
+    if not es_mi_curso(id_curso):
+        return jsonify({"ok": False, "mensaje": "No gestionás este curso"}), 403
+
+    u = _usuario_actual()
+    curso = obtener_curso(id_curso)
+    if not curso:
+        return jsonify({"ok": False, "mensaje": "Curso no encontrado"}), 404
+    if u["id"] != curso["id_creador"]:
+        return jsonify({"ok": False, "mensaje": "Solo el creador del curso puede quitar moderadores"}), 403
+
+    id_destino = request.form.get("id_usuario")
+    if not id_destino:
+        return jsonify({"ok": False, "mensaje": "Falta el usuario"}), 400
+
+    if descender_a_alumno(id_destino, id_curso, curso["id_creador"]):
+        registrar_accion(u["id"], "usuario_descendido", f"Usuario {id_destino} → alumno en curso {id_curso}", _ip_cliente())
+        return jsonify({"ok": True, "mensaje": "Ahora es alumno"})
+    return jsonify({"ok": False, "mensaje": "No se pudo descender (¿es el creador?)"})
 
 # ====================== MATERIAS (API) ======================
 
@@ -580,11 +699,14 @@ def apuntes_crear():
 
     archivos = [a for a in archivos if a and a.filename]
 
+    if not archivos:
+        return jsonify({"ok": False, "mensaje": "Debés subir al menos un archivo"}), 400
+
     for archivo in archivos:
         if not extension_ok(archivo.filename, EXT_APUNTES):
             return jsonify({"ok": False, "mensaje": f"Tipo de archivo no permitido: {archivo.filename}"}), 400
 
-    id_apunte = crear_apunte(titulo, descripcion, u["id"], materia["id_curso"], id_materia)
+    id_apunte = crear_apunte(titulo, descripcion, u["id"], materia["id_curso"], id_materia, u.get("rol", "alumno"))
     if not id_apunte:
         return jsonify({"ok": False, "mensaje": "Error al crear el apunte"}), 500
 
@@ -595,6 +717,8 @@ def apuntes_crear():
         agregar_archivo_apunte(id_apunte, f"uploads/apuntes/{nombre_seguro}", tipo)
 
     registrar_accion(u["id"], "apunte_creado", f"Apunte '{titulo}' (ID: {id_apunte})", _ip_cliente())
+    if u.get("rol") in ("moderador", "admin"):
+        return jsonify({"ok": True, "mensaje": "¡Apunte subido y publicado!", "id": id_apunte})
     return jsonify({"ok": True, "mensaje": "¡Apunte subido! Queda pendiente de aprobación.", "id": id_apunte})
 
 @app.route("/apuntes/eliminar/<int:id_apunte>", methods=["POST"])
@@ -829,4 +953,6 @@ def admin_stats():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "1") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug)

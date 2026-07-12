@@ -2,7 +2,7 @@ const COLORS = {
     celeste: '#4FC3E8', celesteDark: '#1E9BC4',
     amarillo: '#FFCB3D', amarilloDark: '#F2A900',
     verde: '#4CB87D', verdeDark: '#2E9763',
-    rojo: '#F0848C', rojoDark: '#d94f5a',
+    violeta: '#B39DDB', violetaDark: '#7E57C2',
     crema: '#FFFAF0', tinta: '#28344A',
 };
 
@@ -36,7 +36,7 @@ function cargarEstadisticas() {
             const estadoColores = estadoLabels.map(e => {
                 if (e === "aprobado") return COLORS.verde;
                 if (e === "pendiente") return COLORS.amarillo;
-                return COLORS.rojo;
+                return COLORS.violeta;
             });
             new Chart(document.getElementById("chartEstado"), {
                 type: "doughnut",
@@ -75,7 +75,7 @@ function cargarEstadisticas() {
                     labels: matLabels,
                     datasets: [{
                         data: matData,
-                        backgroundColor: [COLORS.celeste, COLORS.amarillo, COLORS.verde, COLORS.rojo,
+                        backgroundColor: [COLORS.celeste, COLORS.amarillo, COLORS.verde, COLORS.violeta,
                             COLORS.celesteDark, COLORS.amarilloDark, COLORS.verdeDark],
                         borderWidth: 2,
                     }]

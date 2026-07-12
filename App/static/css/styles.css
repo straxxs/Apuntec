@@ -1,226 +1,367 @@
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Kalam:wght@600;700&display=swap');
 
 :root {
-    --celeste: #4FC3E8;
-    --celeste-dark: #1E9BC4;
-    --amarillo: #FFCB3D;
-    --amarillo-dark: #F2A900;
-    --verde: #4CB87D;
-    --verde-dark: #2E9763;
-    --crema: #FFFAF0;
-    --tinta: #28344A;
-    --tinta-soft: #5B6B86;
-    --rojo-margen: #F0848C;
+    --celeste: #42A5F5;
+    --celeste-dark: #1565C0;
+    --celeste-light: #BBDEFB;
+    --amarillo: #FFCA28;
+    --amarillo-dark: #F9A825;
+    --amarillo-light: #FFF9C4;
+    --verde: #66BB6A;
+    --verde-dark: #2E7D32;
+    --verde-light: #C8E6C9;
+    --rojo: #EF5350;
+    --rojo-dark: #C62828;
+    --rojo-light: #FFCDD2;
+    --violeta: #7E57C2;
+    --violeta-dark: #512DA8;
+    --violeta-light: #D1C4E9;
+    --crema: #FFFDE7;
+    --tinta: #263238;
+    --tinta-soft: #607D8B;
+    --borde: #CFD8DC;
     --blanco: #FFFFFF;
+    --sombra-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --sombra-md: 0 6px 20px rgba(0, 0, 0, 0.10);
+    --sombra-lg: 0 14px 40px rgba(0, 0, 0, 0.12);
+    --sombra-postit: 2px 3px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --radio: 4px;
+    --transicion: 0.2s ease;
 }
 
-* {
-    box-sizing: border-box;
-}
-
-html, body {
-    overflow-x: hidden;
-}
+* { box-sizing: border-box; }
+html, body { overflow-x: hidden; }
 
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: 'Quicksand', sans-serif;
-    background-color: var(--crema);
+    font-family: 'Nunito', -apple-system, sans-serif;
+    background: var(--crema);
     background-image:
-        radial-gradient(circle at 8% 12%, rgba(79, 195, 232, 0.35), transparent 40%),
-        radial-gradient(circle at 92% 18%, rgba(255, 203, 61, 0.35), transparent 38%),
-        radial-gradient(circle at 12% 90%, rgba(76, 184, 125, 0.3), transparent 40%),
-        radial-gradient(circle at 90% 88%, rgba(79, 195, 232, 0.25), transparent 38%);
+        linear-gradient(rgba(0,0,0,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.015) 1px, transparent 1px);
+    background-size: 24px 24px;
+    color: var(--tinta);
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 60px 16px;
-    position: relative;
+    padding: 50px 16px;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Iconitos flotantes de utiles escolares, solo decoracion */
-.flotante {
-    position: absolute;
-    font-size: 38px;
-    opacity: 0.18;
-    user-select: none;
-    pointer-events: none;
-    animation: flotar 6s ease-in-out infinite;
-}
-.flotante-1 { top: 8%;  left: 7%;  font-size: 34px; animation-delay: 0s; }
-.flotante-2 { top: 14%; right: 8%; font-size: 40px; animation-delay: 1.2s; }
-.flotante-3 { bottom: 10%; left: 9%; font-size: 36px; animation-delay: 2.1s; }
-.flotante-4 { bottom: 14%; right: 7%; font-size: 32px; animation-delay: 0.6s; }
-
-@keyframes flotar {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50%      { transform: translateY(-12px) rotate(6deg); }
-}
-
-/* Tarjeta tipo hoja de cuaderno */
+/* ==================== POST-IT NOTE ==================== */
 .container {
     position: relative;
     width: 100%;
-    max-width: 320px;
-    background-color: var(--blanco);
-    background-image: repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent 30px,
-        rgba(79, 195, 232, 0.08) 30px,
-        rgba(79, 195, 232, 0.08) 32px
-    );
-    border-radius: 24px;
-    padding: 58px 28px 30px;
-    box-shadow:
-        0 16px 40px rgba(40, 52, 74, 0.16),
-        0 4px 10px rgba(40, 52, 74, 0.08);
+    max-width: 400px;
+    background: var(--amarillo-light);
+    border-radius: 2px;
+    padding: 50px 32px 32px;
+    box-shadow: var(--sombra-postit);
+    transform: rotate(-0.5deg);
+    border: none;
 }
 
-/* Renglon rojo de margen, como en una hoja de carpeta */
+/* Cinta adhesiva arriba */
 .container::before {
     content: "";
     position: absolute;
-    top: 0px;
-    bottom: 0px;
-    left: 15px;
-    width: 2px;
-    background: var(--rojo-margen);
-    opacity: 0.3;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(1deg);
+    width: 80px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-/* Medalla / placa con los 3 colores del cole */
+/* Esquina doblada */
+.container::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.04) 50%);
+    border-radius: 0 0 2px 0;
+}
+
+/* ==================== BADGE ==================== */
 .badge {
     position: absolute;
     top: -34px;
     left: 50%;
     transform: translateX(-50%);
-    width: 70px;
-    height: 70px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: var(--blanco);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
     box-shadow:
-        0 0 0 4px var(--celeste),
-        0 0 0 8px var(--blanco),
-        0 0 0 12px var(--celeste),
-        0 6px 14px rgba(0, 0, 0, 0.18);
+        0 0 0 3px var(--celeste),
+        0 0 0 6px var(--blanco),
+        0 0 0 9px var(--amarillo),
+        var(--sombra-md);
+    animation: badge-bob 3s ease-in-out infinite;
 }
 
-/* Espiral de cuaderno */
+@keyframes badge-bob {
+    0%, 100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+    50% { transform: translateX(-50%) translateY(-3px) rotate(2deg); }
+}
+
+/* ==================== ESPIRAL ==================== */
 .spiral {
     display: flex;
     justify-content: center;
-    gap: 9px;
-    margin: 10px 0 20px;
+    gap: 8px;
+    margin: 6px 0 16px;
 }
 .spiral span {
-    width: 11px;
-    height: 11px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: var(--crema);
     box-shadow:
-        inset 0 0 0 2px #c7ccd6,
-        0 2px 3px rgba(0, 0, 0, 0.12);
+        inset 0 0 0 2px #b0bec5,
+        0 2px 4px rgba(0, 0, 0, 0.10);
+    animation: spiral-pulse 4s ease-in-out infinite;
+}
+.spiral span:nth-child(2) { animation-delay: 0.3s; }
+.spiral span:nth-child(3) { animation-delay: 0.6s; }
+.spiral span:nth-child(4) { animation-delay: 0.9s; }
+.spiral span:nth-child(5) { animation-delay: 1.2s; }
+.spiral span:nth-child(6) { animation-delay: 1.5s; }
+.spiral span:nth-child(7) { animation-delay: 1.8s; }
+
+@keyframes spiral-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); box-shadow: inset 0 0 0 2px #b0bec5, 0 2px 6px rgba(0,0,0,0.15); }
 }
 
+/* ==================== TÍTULOS ==================== */
 .titulo-wrap {
     text-align: center;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
 }
 
 .titulo {
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 800;
-    font-size: 25px;
-    color: var(--amarillo-dark);
-    margin: 0 0 4px;
-}
-
-.subrayado {
-    display: block;
-    margin: 0 auto 8px;
+    font-family: 'Kalam', cursive;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--tinta);
+    margin: 0 0 2px;
 }
 
 .subtitulo {
     font-size: 13px;
     color: var(--tinta-soft);
     margin: 0;
+    line-height: 1.4;
 }
 
-form {
-    margin: 0;
-}
+/* ==================== FORMULARIOS ==================== */
+form { margin: 0; }
 
 .campo {
-    margin-bottom: 18px;
-    position: relative;
+    margin-bottom: 28px;
+}
+
+.campo + .campo {
+    padding-top: 0;
+}
+
+#formApunte .btn {
+    margin-top: 14px;
 }
 
 .campo label {
     display: block;
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.04em;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--celeste-dark);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .campo input {
     width: 100%;
     border: none;
-    border-bottom: 2px solid #E2E6ED;
-    background: transparent;
-    padding: 8px 4px;
-    font-family: 'Quicksand', sans-serif;
-    font-size: 15px;
+    border-bottom: 2.5px solid var(--borde);
+    background: rgba(255, 255, 255, 0.5);
+    padding: 12px 4px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
     font-weight: 600;
     color: var(--tinta);
-    transition: border-color 0.2s, background-color 0.2s;
+    border-radius: 0;
+    transition: border-color var(--transicion), background var(--transicion);
 }
 
 .campo input::placeholder {
-    color: #B7BFCC;
+    color: #90A4AE;
     font-weight: 500;
 }
 
 .campo input:focus {
     outline: none;
     border-bottom-color: var(--celeste-dark);
-    background: rgba(79, 195, 232, 0.07);
+    background: rgba(255, 255, 255, 0.7);
 }
 
+.campo-hint {
+    display: block;
+    font-size: 11px;
+    color: var(--tinta-soft);
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* ==================== PASSWORD TOGGLE ==================== */
+.campo-password {
+    position: relative;
+}
+
+.campo-password input {
+    padding-right: 42px;
+}
+
+.btn-toggle-pass {
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    color: var(--tinta-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color var(--transicion), background var(--transicion);
+}
+
+.btn-toggle-pass:hover {
+    color: var(--celeste-dark);
+    background: rgba(66, 165, 245, 0.1);
+}
+
+/* ==================== BARRA DE FORTALEZA ==================== */
+.barra-fortaleza {
+    height: 6px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.barra-fortaleza-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 6px;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.barra-fortaleza.nivel-1 .barra-fortaleza-fill { width: 25%; background: var(--rojo); }
+.barra-fortaleza.nivel-2 .barra-fortaleza-fill { width: 50%; background: var(--amarillo-dark); }
+.barra-fortaleza.nivel-3 .barra-fortaleza-fill { width: 75%; background: var(--celeste); }
+.barra-fortaleza.nivel-4 .barra-fortaleza-fill { width: 100%; background: var(--verde-dark); }
+
+/* ==================== REQUISITOS ==================== */
+.requisitos {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 12px;
+}
+
+.requisitos li {
+    font-size: 11px;
+    color: var(--tinta-soft);
+    padding: 2px 0;
+    transition: color 0.3s, transform 0.2s;
+}
+
+.requisitos li::before {
+    content: "○";
+    margin-right: 5px;
+    font-size: 10px;
+}
+
+.requisitos li.cumple {
+    color: var(--verde-dark);
+    font-weight: 700;
+    transform: translateX(2px);
+}
+
+.requisitos li.cumple::before {
+    content: "✓";
+    font-weight: 900;
+}
+
+/* ==================== LOGO ==================== */
+.logo-auth {
+    display: block;
+    max-width: 180px;
+    height: auto;
+    margin: 0 auto 8px;
+}
+
+/* ==================== BOTÓN PRINCIPAL ==================== */
 .btn-enviar {
     display: block;
     width: 100%;
     margin-top: 10px;
-    padding: 13px;
-    border: none;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--amarillo), var(--amarillo-dark));
+    padding: 12px;
+    border: 2.5px solid var(--amarillo-dark);
+    border-radius: 2px;
+    background: var(--amarillo);
     color: var(--tinta);
-    font-family: 'Baloo 2', sans-serif;
+    font-family: 'Kalam', cursive;
     font-weight: 700;
-    font-size: 16px;
-    letter-spacing: 0.02em;
+    font-size: 15px;
+    letter-spacing: 0.03em;
     cursor: pointer;
-    box-shadow: 4px 4px 0 var(--verde-dark);
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: transform 0.12s, background 0.12s;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    transform: rotate(-0.5deg);
+}
+
+.btn-enviar::after {
+    content: "✏️";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
 }
 
 .btn-enviar:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--verde-dark);
+    transform: rotate(0deg) translateY(-2px);
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.18);
+}
+
+.btn-enviar:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) rotate(-12deg);
 }
 
 .btn-enviar:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--verde-dark);
+    transform: rotate(0deg) translate(1px, 1px);
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
 }
 
 .btn-enviar:focus-visible {
@@ -228,10 +369,18 @@ form {
     outline-offset: 2px;
 }
 
+.btn-enviar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ==================== ENLACES ==================== */
 .enlace-secundario {
     text-align: center;
-    margin: 22px 0 0;
-    font-size: 13.5px;
+    margin: 16px 0 0;
+    font-size: 13px;
     color: var(--tinta-soft);
 }
 
@@ -239,45 +388,18 @@ form {
     color: var(--celeste-dark);
     font-weight: 700;
     text-decoration: none;
-    border-bottom: 2px solid var(--amarillo);
+    border-bottom: 2px dashed var(--amarillo-dark);
     padding-bottom: 1px;
+    transition: color var(--transicion), border-color var(--transicion);
 }
 
 .enlace-secundario a:hover {
     color: var(--verde-dark);
     border-bottom-color: var(--verde);
+    border-bottom-style: solid;
 }
 
-.enlace-secundario a:focus-visible {
-    outline: 2px solid var(--celeste-dark);
-    outline-offset: 2px;
-}
-
-@media (max-width: 380px) {
-    .container {
-        padding: 50px 18px 24px;
-    }
-    .badge {
-        width: 58px;
-        height: 58px;
-        font-size: 24px;
-        top: -28px;
-    }
-    .flotante {
-        display: none;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .flotante {
-        animation: none;
-    }
-    .btn-enviar {
-        transition: none;
-    }
-}
-
-/* ---------- Toasts ---------- */
+/* ==================== TOASTS ==================== */
 #toast-container {
     position: fixed;
     top: 20px;
@@ -286,41 +408,71 @@ form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-width: 320px;
+    max-width: 360px;
 }
 
 .toast {
     padding: 14px 18px;
-    border-radius: 12px;
-    font-family: 'Quicksand', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
+    border-radius: 4px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
     color: var(--blanco);
-    box-shadow: 0 8px 20px rgba(40, 52, 74, 0.22);
+    box-shadow: var(--sombra-md);
     opacity: 0;
-    transform: translateX(40px);
+    transform: translateX(40px) rotate(1deg);
     transition: opacity 0.3s ease, transform 0.3s ease;
+    position: relative;
 }
 
 .toast-visible {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) rotate(0deg);
 }
 
 .toast-ok {
     background: linear-gradient(135deg, var(--verde), var(--verde-dark));
+    border-left: 4px solid var(--amarillo);
 }
 
 .toast-error {
     background: linear-gradient(135deg, var(--rojo), var(--rojo-dark));
+    border-left: 4px solid var(--amarillo);
 }
 
+/* ==================== DOODLES DECORATIVOS ==================== */
+.doodle {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.08;
+    font-size: 40px;
+}
+.doodle-1 { top: 12%; left: -20px; transform: rotate(-15deg); }
+.doodle-2 { top: 8%; right: -15px; transform: rotate(10deg); }
+.doodle-3 { bottom: 15%; left: -18px; transform: rotate(20deg); }
+.doodle-4 { bottom: 10%; right: -12px; transform: rotate(-8deg); }
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 480px) {
+    .container {
+        padding: 42px 20px 24px;
+        transform: rotate(0deg);
+    }
+    .requisitos {
+        grid-template-columns: 1fr;
+    }
     #toast-container {
         left: 16px;
         right: 16px;
         max-width: none;
     }
-    .toast { transform: translateY(-40px); }
-    .toast-visible { transform: translateY(0); }
+    .toast { transform: translateY(-40px) rotate(0deg); }
+    .toast-visible { transform: translateY(0) rotate(0deg); }
+    .doodle { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-enviar, .badge, .spiral span { animation: none; transition: none; }
+    .toast { transition: none; }
 }

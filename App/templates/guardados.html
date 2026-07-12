@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis guardados - KIROKU</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
 </head>
 <body>
 
 <div class="topbar">
-    <a href="/home" class="apuntec-btn"><h1>KIROKU</h1></a>
+    <a href="/home" class="apuntec-btn"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="" class="logo-topbar"><h1>KIROKU</h1></a>
     <div class="perfil-menu">
         <img id="perfilAvatar" class="perfil-avatar"
             src="{{ url_for('static', filename=session_avatar) }}" alt="Mi avatar">
@@ -19,6 +20,7 @@
             {% if session_id_curso %}<a href="/curso/{{ session_id_curso }}">Mi curso</a>{% endif %}
             <a href="/home">Inicio</a>
             {% if rol == 'admin' %}<a href="/admin">Panel admin</a>{% endif %}
+            {% if rol == 'admin' %}<a href="/admin/estadisticas">Estadísticas</a>{% endif %}
             <hr>
             <a href="/logout" class="item-logout">Cerrar sesión</a>
         </div>
@@ -39,11 +41,13 @@
                 <a href="/materia/{{ a.id_materia }}#apunte-{{ a.id }}" class="btn btn-celeste btn-chico">Ver apunte</a>            </div>
             {% endfor %}
         {% else %}
-            <p class="vacio">Todavía no guardaste ningún apunte. 🔖</p>
+            <p class="vacio">Todavía no guardaste ningún apunte. 🔖<br><small>Visitá una materia y tocá el ícono de guardado para guardar apuntes aquí.</small></p>
         {% endif %}
     </div>
 </div>
 
+<script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/topbar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 </body>
 </html>

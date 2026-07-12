@@ -4,12 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi perfil - KIROKU</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
 </head>
 <body data-avatar-actual="{{ usuario.avatar.split('/')[-1] if usuario.avatar else '' }}">
-
+<div class="doodles">
+    <span class="d1">✏️</span>
+    <span class="d2">📝</span>
+    <span class="d3">📚</span>
+    <span class="d4">⭐</span>
+    <span class="d5">📎</span>
+    <span class="d6">🗒️</span>
+    <span class="d7">🎓</span>
+    <span class="d8">💡</span>
+    <span class="d9">📖</span>
+    <span class="d10">🎨</span>
+    <span class="d11">🧪</span>
+    <span class="d12">✂️</span>
+    <span class="d13">📐</span>
+    <span class="d14">🖌️</span>
+    <span class="d15">🎒</span>
+    <span class="d16">🔢</span>
+</div>
 <div class="topbar">
-    <a href="/home" class="apuntec-btn"><h1>KIROKU</h1></a>
+    <a href="/home" class="apuntec-btn"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="" class="logo-topbar"><h1>KIROKU</h1></a>
     <div class="perfil-menu">
         <img id="perfilAvatar" class="perfil-avatar"
             src="{{ url_for('static', filename=session_avatar) }}" alt="Mi avatar">
@@ -21,6 +39,7 @@
             {% endif %}
             <a href="/home">Inicio</a>
             {% if rol == 'admin' %}<a href="/admin">Panel admin</a>{% endif %}
+            {% if rol == 'admin' %}<a href="/admin/estadisticas">Estadísticas</a>{% endif %}
             <hr>
             <a href="/logout" class="item-logout">Cerrar sesión</a>
         </div>
@@ -59,13 +78,42 @@
             <!-- Guarda el avatar elegido -->
             <input type="hidden" id="avatarElegido" name="avatar" value="">
 
-            <button type="submit" class="btn btn-amarillo" style="margin-top:16px;">Guardar cambios</button>
+            <div class="campo" style="display:flex;align-items:flex-end; margin-top:12px;">
+                <button type="submit" class="btn btn-amarillo" style="width:100%; transform:none;">Guardar cambios</button>
+            </div>
         </form>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+        <h2>Mi información</h2>
+        <div class="info-lista">
+            <div class="info-fila">
+                <span class="info-label">Email</span>
+                <span class="info-valor">{{ usuario.email }}</span>
+            </div>
+            <div class="info-fila">
+                <span class="info-label">Rol</span>
+                <span class="info-valor info-rol">{{ rol }}</span>
+            </div>
+            {% if usuario.anio and usuario.division %}
+            <div class="info-fila">
+                <span class="info-label">Curso</span>
+                <span class="info-valor">{{ usuario.anio }}° {{ usuario.division }}°</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card" style="text-align:center; margin-top:16px;">
+        <h2>Mis guardados</h2>
+        <p style="margin-bottom:14px;">Revisá los apuntes que guardaste para después.</p>
+        <a href="/guardados" class="btn btn-celeste">Ver guardados</a>
     </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/topbar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sounds.js') }}"></script>
 <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 <script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
 </body>

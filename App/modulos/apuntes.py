@@ -3,9 +3,10 @@ import pymysql
 from db.conexion import obtener_conexion
 
 
-def crear_apunte(titulo, descripcion, id_usuario, id_curso, id_materia):
+def crear_apunte(titulo, descripcion, id_usuario, id_curso, id_materia, rol="alumno"):
     if not id_materia or not id_curso or not titulo:
         return False
+    estado = "aprobado" if rol in ("moderador", "admin") else "pendiente"
     conn = obtener_conexion()
     if not conn:
         return False
@@ -13,8 +14,8 @@ def crear_apunte(titulo, descripcion, id_usuario, id_curso, id_materia):
     try:
         cursor.execute("""
             INSERT INTO Apunte(titulo, descripcion, id_usuario_creador, id_curso, id_materia, estado)
-            VALUES (%s, %s, %s, %s, %s, 'pendiente')
-        """, (titulo, descripcion, id_usuario, id_curso, id_materia))
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (titulo, descripcion, id_usuario, id_curso, id_materia, estado))
         conn.commit()
         return cursor.lastrowid
     except Exception as e:

@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `curso` (
   `anio` int(11) NOT NULL,
   `division` varchar(25) NOT NULL,
   `id_creador` int(11) DEFAULT NULL,
+  `codigo_invitacion` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -127,9 +128,9 @@ CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
 -- 2. DATOS DE EJEMPLO (sin FK checks)
 -- ============================================================
 
-INSERT INTO `curso` (`id`, `anio`, `division`, `id_creador`) VALUES
-(1, 3, '5', 1),
-(6, 6, '3', 14);
+INSERT INTO `curso` (`id`, `anio`, `division`, `id_creador`, `codigo_invitacion`) VALUES
+(1, 3, '5', 1, 'EB2A-CB75'),
+(6, 6, '3', 14, '1420-2FE4');
 
 INSERT INTO `usuario` (`id`, `nombre`, `email`, `contrasena`, `avatar`, `rol`, `id_curso`, `estado`) VALUES
 (1, 'testuser', 'testuser@kiroku.com', 'c203b9af7abd13b642334c14a08e28b2a326c89c3d367e843c374fab0d487897', 'uploads/avatares/avatar3.png', 'moderador', 1, 'activo'),

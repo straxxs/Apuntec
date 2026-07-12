@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estadísticas - KIROKU</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/panel.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
 <div class="topbar">
-    <a href="/home" class="apuntec-btn"><h1>KIROKU</h1></a>
+    <a href="/home" class="apuntec-btn"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="" class="logo-topbar"><h1>KIROKU</h1></a>
     <div class="perfil-menu">
         <img id="perfilAvatar" class="perfil-avatar"
             src="{{ url_for('static', filename=session_avatar) }}" alt="Mi avatar">
@@ -18,6 +19,7 @@
         <div id="perfilDropdown" class="dropdown-menu">
             <div class="dropdown-header">{{ nombre }}</div>
             <a href="/perfil">Mi perfil</a>
+            {% if session_id_curso %}<a href="/curso/{{ session_id_curso }}">Mi curso</a>{% endif %}
             <a href="/home">Inicio</a>
             {% if rol == 'admin' %}<a href="/admin">Panel admin</a>{% endif %}
             {% if rol == 'admin' %}<a href="/admin/estadisticas">Estadísticas</a>{% endif %}

@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperar contraseña - KIROKU</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 
-<span class="flotante flotante-1" aria-hidden="true">🔑</span>
-<span class="flotante flotante-2" aria-hidden="true">📧</span>
-<span class="flotante flotante-3" aria-hidden="true">🔒</span>
-<span class="flotante flotante-4" aria-hidden="true">✨</span>
+<div class="doodle doodle-1" aria-hidden="true">🔑</div>
+<div class="doodle doodle-2" aria-hidden="true">📧</div>
+<div class="doodle doodle-3" aria-hidden="true">🔒</div>
+<div class="doodle doodle-4" aria-hidden="true">✨</div>
 
 <div class="container">
     <div class="badge" aria-hidden="true">🔑</div>
@@ -21,19 +22,20 @@
     </div>
 
     <div class="titulo-wrap">
-        <h2 class="titulo">Recuperar contraseña</h2>
-        <p class="subtitulo">Ingresá tu email y te enviaremos un enlace para restablecerla</p>
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="KIROKU" class="logo-auth">
+        <p class="subtitulo">Ingresá tu email y te mandamos un enlace para recuperar tu contraseña</p>
     </div>
 
-    <form id="recuperarForm">
+    <form id="recuperarForm" novalidate>
         <div class="campo">
             <label for="email">Email registrado</label>
-            <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+            <input type="email" id="email" name="email" placeholder="tu@email.com" required
+                   maxlength="254" autocomplete="email">
         </div>
         <button type="submit" class="btn-enviar">Enviar enlace</button>
     </form>
 
-    <p class="enlace-secundario">¿Recordaste tu contraseña? <a href="/login">Iniciá sesión</a></p>
+    <p class="enlace-secundario">¿Recordaste? <a href="/login">Volvé al login</a></p>
 </div>
 
 <script src="{{ url_for('static', filename='js/toast.js') }}"></script>

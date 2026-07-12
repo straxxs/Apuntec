@@ -13,6 +13,7 @@ const ICONOS = {
 // ---------- Genera el preview de UN archivo ----------
 function htmlPreview(f) {
     const url = `/static/${f.ruta}`;
+    const descarga = `/descargar/${encodeURIComponent(f.ruta)}`;
     const tipo = (f.tipo || "").toLowerCase();
 
     // Imagen -> thumbnail + lightbox
@@ -23,7 +24,7 @@ function htmlPreview(f) {
                      onclick="abrirLightbox('${url}')">
                 <div class="preview-footer">
                     <span class="tipo">${tipo}</span>
-                    <a href="${url}">
+                    <a href="${descarga}">
                     <button class="Btn">
                         <svg class="svgIcon" viewBox="0 0 384 512" height="10px" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
                         <span class="icon2"></span>
@@ -41,8 +42,8 @@ function htmlPreview(f) {
                 <iframe class="preview-pdf" src="${url}#toolbar=0"></iframe>
                 <div class="preview-footer">
                     <span class="tipo">pdf</span>
-                    <a href="${url}" target="_blank">
-                    <button class="Btn2"><strong>Ver archivo</strong></button>
+                    <a href="${descarga}">
+                    <button class="Btn2"><strong>Descargar</strong></button>
                     </a>
                 </div>
             </div>`;
@@ -55,7 +56,7 @@ function htmlPreview(f) {
                 <video class="preview-video" controls src="${url}"></video>
                 <div class="preview-footer">
                     <span class="tipo">${tipo}</span>
-                    <a href="${url}">
+                    <a href="${descarga}">
                     <button class="Btn">
                         <svg class="svgIcon" viewBox="0 0 384 512" height="10px" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
                         <span class="icon2"></span>
@@ -73,7 +74,7 @@ function htmlPreview(f) {
             <div class="preview-generico">
                 <div class="icono">${icono}</div>
                 <div class="nombre">Archivo ${tipo}</div>
-                <a href="${url}" download>
+                <a href="${descarga}">
                 <button class="Btn">
                     <svg class="svgIcon" viewBox="0 0 384 512" height="10px" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
                     <span class="icon2"></span>
@@ -131,7 +132,7 @@ function cargarApuntes() {
             cont.innerHTML = "";
 
             if (!data.apuntes || data.apuntes.length === 0) {
-                cont.innerHTML = '<p class="vacio">Todavía no hay apuntes. 📄</p>';
+                cont.innerHTML = '<p class="vacio">Todavía no hay apuntes. 📄<br><small>Usá el formulario de arriba para subir el primero.</small></p>';
                 return;
             }
 
@@ -167,8 +168,7 @@ function cargarApuntes() {
                     </button>`;
 
                 const div = document.createElement("div");
-                div.className = "card";
-                div.style.marginBottom = "14px";
+                div.className = "card card-apunte";
                 div.id = `apunte-${a.id}`;
                 div.innerHTML = `
                     <div class="autor-linea">
@@ -206,8 +206,9 @@ function cargarApuntes() {
 
 
 // ---------- Borrar apunte ----------
-function borrarApunte(id) {
-    if (!confirm("¿Eliminar este apunte?")) return;
+async function borrarApunte(id) {
+    const ok = await kirokuConfirm("🗑️", "Eliminar apunte", "¿Eliminar este apunte? No se podrá recuperar.", "Eliminar", "Cancelar");
+    if (!ok) return;
     fetch(`/apuntes/eliminar/${id}`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
@@ -223,15 +224,21 @@ const formApunte = document.getElementById("formApunte");
 if (formApunte) {
     formApunte.addEventListener("submit", function (e) {
         e.preventDefault();
+        if (!this.reportValidity()) return;
         const fd = new FormData(this);
         fd.append("id_materia", ID_MATERIA);
+        const archivos = fd.getAll("archivo").filter(a => a && a.name);
+        if (archivos.length === 0) {
+            mostrarToast("Debés subir al menos un archivo", "error");
+            return;
+        }
         fetch("/apuntes/crear", { method: "POST", body: fd })
             .then(res => res.json())
             .then(data => {
                 mostrarToast(data.mensaje, data.ok ? "ok" : "error");
                 if (data.ok) {
                     this.reset();
-                    fileTexto.textContent = "Elegí archivos o arrastralos acá (opcional)";
+                    fileTexto.textContent = "Elegí archivos o arrastralos acá";
                     fileDrop.classList.remove("tiene-archivo");
                     cargarApuntes();
                 }
@@ -332,6 +339,7 @@ function toggleGuardar(idApunte, checkbox) {
         .then(data => {
             mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) {
+                if (typeof sonidoPop === "function") sonidoPop();
                 checkbox.checked = (data.estado === "guardado");
             } else {
                 checkbox.checked = !checkbox.checked;
@@ -350,6 +358,7 @@ function toggleMeGusta(idApunte, boton) {
         .then(data => {
             mostrarToast(data.mensaje, data.ok ? "ok" : "error");
             if (data.ok) {
+                if (typeof sonidoLike === "function") sonidoLike();
                 boton.classList.toggle("activo", data.estado === "gustado");
                 const countEl = boton.querySelector(".megusta-count");
                 if (countEl) countEl.textContent = data.cantidad;

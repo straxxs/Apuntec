@@ -15,6 +15,10 @@ function mostrarToast(mensaje, tipo = "ok") {
     toast.textContent = mensaje;
     cont.appendChild(toast);
 
+    // Sonido
+    if (typeof sonidoExito === "function" && tipo === "ok") sonidoExito();
+    else if (typeof sonidoError === "function" && tipo === "error") sonidoError();
+
     // Animación de entrada
     requestAnimationFrame(() => toast.classList.add("toast-visible"));
 

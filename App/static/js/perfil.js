@@ -22,6 +22,7 @@ if (grid && inputElegido && preview) {
 const formPerfil = document.getElementById("formPerfil");
 if (formPerfil) formPerfil.addEventListener("submit", function (e) {
     e.preventDefault();
+    if (!this.reportValidity()) return;
     fetch("/perfil/actualizar", { method: "POST", body: new FormData(this) })
         .then(res => res.json())
         .then(data => {

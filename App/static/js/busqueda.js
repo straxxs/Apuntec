@@ -71,8 +71,7 @@ function hacerBusqueda() {
                 }
 
                 const div = document.createElement("div");
-                div.className = "card";
-                div.style.marginBottom = "12px";
+                div.className = "card card-apunte";
                 div.innerHTML = `
                     <div style="display:flex;gap:12px;align-items:flex-start;">
                         ${miniatura}
@@ -84,13 +83,13 @@ function hacerBusqueda() {
                                     · ⭐ ${a.promedio} (${a.cant_calificaciones})
                                 </span>
                             </div>
-                            <h3 style="margin:4px 0;color:var(--tinta);">${escapeHtml(a.titulo || "(sin título)")}</h3>
-                            <p style="color:var(--tinta-soft);margin:2px 0;">
+                            <p style="color:var(--celeste-dark);font-weight:700;font-size:13px;margin:4px 0 2px;text-transform:uppercase;letter-spacing:0.03em;">
                                 ${escapeHtml(a.materia || "Sin materia")}
                             </p>
-                            <p style="margin:4px 0;">${escapeHtml(a.descripcion || "")}</p>
+                            <h3 style="margin:2px 0;color:var(--tinta);">${escapeHtml(a.titulo || "(sin título)")}</h3>
+                            <p style="color:var(--tinta-soft);margin:2px 0;font-size:13px;">${escapeHtml(a.descripcion || "")}</p>
                             <a href="/materia/${a.id_materia}#apunte-${a.id}"
-                               class="btn btn-celeste btn-chico">Ver apunte</a>
+                               class="btn btn-celeste btn-chico" style="margin-top:8px;">Ver apunte</a>
                         </div>
                     </div>`;
                 contResultados.appendChild(div);
