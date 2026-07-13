@@ -1,3 +1,4 @@
+(function () {
 // ---------- Crear curso ----------
 const formCurso = document.getElementById("formCurso");
 if (formCurso) {
@@ -47,3 +48,4 @@ if (btnSalir) {
             .catch(() => mostrarToast("Hubo un error de conexión.", "error"));
     });
 }
+})();

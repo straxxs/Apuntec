@@ -1,3 +1,4 @@
+(function(){
 // ---------- Usuarios ----------
 function cargarUsuarios() {
     fetch("/admin/usuarios")
@@ -128,3 +129,9 @@ async function borrarCurso(id) {
 
 cargarUsuarios();
 cargarCursos();
+
+window.borrarUsuario = borrarUsuario;
+window.toggleEstado = toggleEstado;
+window.cambiarRol = cambiarRol;
+window.borrarCurso = borrarCurso;
+})();

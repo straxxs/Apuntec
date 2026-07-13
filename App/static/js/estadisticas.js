@@ -1,3 +1,4 @@
+(function(){
 const COLORS = {
     celeste: '#4FC3E8', celesteDark: '#1E9BC4',
     amarillo: '#FFCB3D', amarilloDark: '#F2A900',
@@ -123,3 +124,4 @@ function cargarEstadisticas() {
 }
 
 cargarEstadisticas();
+})();
