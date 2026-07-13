@@ -113,7 +113,7 @@ Proyecto Mitingay/
 
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/straxxs/Apuntec.git
+   git clone https://github.com/straxxs/Kiroku.git
    cd Apuntec/App
    ```
 
