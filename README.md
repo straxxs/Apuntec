@@ -10,7 +10,7 @@ Kiroku es una plataforma desarrollada para que los estudiantes de la Escuela Té
 
 ### Funcionales
 - **Registro e inicio de sesión** con nombre de usuario o email (bcrypt + JWT, rechaza usuarios bloqueados)
-- **Recuperación de contraseña** por email
+- **Recuperación de contraseña** por email (simulado sin SMTP)
 - **Subida de apuntes** (PDF, imágenes, videos, documentos) con drag & drop
 - **Búsqueda avanzada** por materia, fecha, autor y palabras clave
 - **Descarga de archivos** directa
@@ -37,7 +37,7 @@ Kiroku es una plataforma desarrollada para que los estudiantes de la Escuela Té
 | Administrador | Gestión total de usuarios, roles y estadísticas |
 
 ### Estética visual
-- Diseño **post-it** con papel de fondo, cintas adhesivas y sombras
+- Diseño **post-it** con papel de fondo, tachuelas y sombras
 - Tipografías **Kalam** (headings) + **Nunito** (body)
 - Paleta: celeste, amarillo, verde, rojo, violeta
 - Botones con borde, estilo post-it, y efecto press
@@ -114,7 +114,7 @@ Proyecto Mitingay/
 1. Clonar el repositorio:
    ```bash
    git clone https://github.com/straxxs/Kiroku.git
-   cd Apuntec/App
+   cd Kiroku/App
    ```
 
 2. Instalar dependencias:
