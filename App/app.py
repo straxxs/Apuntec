@@ -251,11 +251,17 @@ def home():
     if not requiere_login():
         return redirect(url_for("login_route"))
     u = _usuario_actual()
+    es_creador = False
+    if u.get("id_curso"):
+        curso = obtener_curso(u["id_curso"])
+        if curso and curso["id_creador"] == u["id"]:
+            es_creador = True
     return render_template(
         "home.html",
         nombre=u.get("nombre"),
         rol=u.get("rol"),
         id_curso=u.get("id_curso"),
+        es_creador=es_creador,
     )
 
 

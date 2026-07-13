@@ -63,7 +63,11 @@
             <p>Ya formás parte de un curso. Entrá para ver materias y apuntes.</p>
             <div class="acciones">
                 <a href="/curso/{{ id_curso }}" class="btn btn-celeste">Ir a mi curso</a>
+                {% if es_creador %}
+                <button id="btnEliminarCurso" class="btn btn-rojo">Eliminar curso</button>
+                {% else %}
                 <button id="btnSalir" class="btn btn-rojo">Salir del curso</button>
+                {% endif %}
             </div>
         {% else %}
             <p>Todavía no pertenecés a ningún curso. Unite a uno o creá el tuyo.</p>

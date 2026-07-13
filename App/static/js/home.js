@@ -48,4 +48,21 @@ if (btnSalir) {
             .catch(() => mostrarToast("Hubo un error de conexión.", "error"));
     });
 }
+
+// ---------- Eliminar curso (solo creador) ----------
+const btnEliminarCurso = document.getElementById("btnEliminarCurso");
+if (btnEliminarCurso) {
+    btnEliminarCurso.addEventListener("click", async function () {
+        const ok = await kirokuConfirm(L("trash-2", 20), "Eliminar curso", "Se eliminarán todas las materias, apuntes y archivos. Los integrantes perderán el acceso. ¿Continuar?", "Eliminar", "Cancelar");
+        if (!ok) return;
+        const idCurso = document.body.dataset.idCurso;
+        fetch(`/cursos/eliminar/${idCurso}`, { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                mostrarToast(data.mensaje, data.ok ? "ok" : "error");
+                if (data.ok) setTimeout(() => window.location.href = "/home", 800);
+            })
+            .catch(() => mostrarToast("Hubo un error de conexión.", "error"));
+    });
+}
 })();
